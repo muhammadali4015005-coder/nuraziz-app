@@ -1,0 +1,878 @@
+import { useState, useEffect } from 'react'
+import { Lock } from 'lucide-react'
+import { NotificationManager } from '../Notification'
+
+export default function SchoolTab({ userData, setUserData }) {
+  const [isLocked, setIsLocked] = useState(true)
+  const [code, setCode] = useState('')
+  const [savedCode, setSavedCode] = useState('')
+  const [schedule, setSchedule] = useState({})
+  const [activeDay, setActiveDay] = useState('monday')
+  const [newLesson, setNewLesson] = useState({ subject: '', time: '' })
+  const [weeklySchedule, setWeeklySchedule] = useState('')
+  const [editingLesson, setEditingLesson] = useState(null) // { day, index, subject, time }
+  
+  // Kod o'zgartirish uchun
+  const [showChangeCode, setShowChangeCode] = useState(false)
+  const [currentSchoolCode, setCurrentSchoolCode] = useState('')
+  const [accountPassword, setAccountPassword] = useState('')
+  const [newSchoolCode, setNewSchoolCode] = useState('')
+
+  const days = [
+    { id: 'monday', label: 'Dushanba' },
+    { id: 'tuesday', label: 'Seshanba' },
+    { id: 'wednesday', label: 'Chorshanba' },
+    { id: 'thursday', label: 'Payshanba' },
+    { id: 'friday', label: 'Juma' },
+    { id: 'saturday', label: 'Shanba' }
+  ]
+
+  const schoolGrade = userData?.settings?.schoolGrade || ''
+  const isEarlyGrade = schoolGrade && parseInt(schoolGrade) >= 1 && parseInt(schoolGrade) <= 4
+
+  useEffect(() => {
+    if (userData?.schoolCode) {
+      setSavedCode(userData.schoolCode)
+    }
+    if (userData?.schoolSchedule) {
+      setSchedule(userData.schoolSchedule)
+    }
+    if (userData?.weeklySchedule) {
+      setWeeklySchedule(userData.weeklySchedule)
+    }
+  }, [userData])
+
+  const saveToMongoDB = async (data) => {
+    try {
+      await fetch('/api/save-school', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: userData.phone,
+          ...data
+        })
+      })
+    } catch (err) {
+      console.error('School save error:', err)
+    }
+  }
+
+  const handleCodeSubmit = () => {
+    if (!savedCode) {
+      // Birinchi marta - kod o'rnatish
+      if (code.length >= 4 && code.length <= 6) {
+        setSavedCode(code)
+        setIsLocked(false)
+        const updatedData = { ...userData, schoolCode: code }
+        setUserData(updatedData)
+        saveToMongoDB({ schoolCode: code })
+        setCode('')
+      } else {
+        NotificationManager.warning('XATO', 'Kod 4-6 raqam bo\'lishi kerak!')
+      }
+    } else {
+      // Kod tekshirish
+      if (code === savedCode) {
+        setIsLocked(false)
+        setCode('')
+      } else {
+        NotificationManager.warning('XATO', 'Kod noto\'g\'ri!')
+        setCode('')
+      }
+    }
+  }
+
+  const addLesson = () => {
+    if (!newLesson.subject || !newLesson.time) {
+      NotificationManager.warning('XATO', 'Dars nomi va vaqtini kiriting!')
+      return
+    }
+
+    const updatedSchedule = {
+      ...schedule,
+      [activeDay]: [...(schedule[activeDay] || []), newLesson]
+    }
+    
+    setSchedule(updatedSchedule)
+    setNewLesson({ subject: '', time: '' })
+    
+    const updatedData = { ...userData, schoolSchedule: updatedSchedule }
+    setUserData(updatedData)
+    saveToMongoDB({ schoolSchedule: updatedSchedule })
+  }
+
+  const deleteLesson = (dayId, index) => {
+    const updatedSchedule = {
+      ...schedule,
+      [dayId]: schedule[dayId].filter((_, i) => i !== index)
+    }
+    
+    setSchedule(updatedSchedule)
+    
+    const updatedData = { ...userData, schoolSchedule: updatedSchedule }
+    setUserData(updatedData)
+    saveToMongoDB({ schoolSchedule: updatedSchedule })
+  }
+
+  const saveWeeklySchedule = () => {
+    const updatedData = { ...userData, weeklySchedule }
+    setUserData(updatedData)
+    saveToMongoDB({ weeklySchedule })
+    NotificationManager.success('MUVAFFAQ', 'Haftalik jadval saqlandi!')
+  }
+
+  const startEditLesson = (dayId, index) => {
+    const lesson = schedule[dayId][index]
+    setEditingLesson({
+      day: dayId,
+      index: index,
+      subject: lesson.subject,
+      time: lesson.time
+    })
+  }
+
+  const saveEditLesson = () => {
+    if (!editingLesson.subject || !editingLesson.time) {
+      alert('Dars nomi va vaqtini kiriting!')
+      return
+    }
+
+    const updatedSchedule = {
+      ...schedule,
+      [editingLesson.day]: schedule[editingLesson.day].map((lesson, idx) =>
+        idx === editingLesson.index 
+          ? { subject: editingLesson.subject, time: editingLesson.time }
+          : lesson
+      )
+    }
+    
+    setSchedule(updatedSchedule)
+    setEditingLesson(null)
+    
+    const updatedData = { ...userData, schoolSchedule: updatedSchedule }
+    setUserData(updatedData)
+    saveToMongoDB({ schoolSchedule: updatedSchedule })
+  }
+
+  const handleChangeCode = async () => {
+    // 1. Hozirgi maktab kodini tekshirish
+    if (currentSchoolCode !== savedCode) {
+      NotificationManager.warning('XATO', 'Hozirgi maktab kodi noto\'g\'ri!')
+      return
+    }
+
+    // 2. Akkaunt parolini tekshirish
+    if (accountPassword !== userData.pass) {
+      NotificationManager.warning('XATO', 'Akkaunt paroli noto\'g\'ri!')
+      return
+    }
+
+    // 3. Yangi kod validatsiya
+    if (newSchoolCode.length < 4 || newSchoolCode.length > 6) {
+      NotificationManager.warning('XATO', 'Yangi kod 4-6 raqam bo\'lishi kerak!')
+      return
+    }
+
+    // 4. Kodni o'zgartirish
+    setSavedCode(newSchoolCode)
+    const updatedData = { ...userData, schoolCode: newSchoolCode }
+    setUserData(updatedData)
+    await saveToMongoDB({ schoolCode: newSchoolCode })
+    
+    alert('Kod muvaffaqiyatli o\'zgartirildi!')
+    setShowChangeCode(false)
+    setCurrentSchoolCode('')
+    setAccountPassword('')
+    setNewSchoolCode('')
+  }
+
+  const getTodaySchedule = () => {
+    const today = new Date().getDay()
+    const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const todayId = dayMap[today]
+    
+    if (todayId === 'sunday') {
+      return { day: 'Yakshanba', lessons: [], isRest: true }
+    }
+    
+    const dayLabel = days.find(d => d.id === todayId)?.label || ''
+    return { day: dayLabel, lessons: schedule[todayId] || [], isRest: false }
+  }
+
+  if (isLocked) {
+    return (
+      <div className="card">
+        <h2>🎓 MAKTAB</h2>
+        
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          minHeight: '400px',
+          padding: '40px'
+        }}>
+          <div style={{ fontSize: '80px', marginBottom: '20px' }}>🔒</div>
+          <h3 style={{ color: '#00d4ff', marginBottom: '16px' }}>
+            {savedCode ? 'Kodni kiriting' : 'Kod o\'rnating'}
+          </h3>
+          <p style={{ color: '#aaa', marginBottom: '24px', textAlign: 'center' }}>
+            {savedCode 
+              ? 'Maktab bo\'limiga kirish uchun kodni kiriting'
+              : 'Maktab bo\'limini himoya qilish uchun 4-6 raqamli kod o\'rnating'
+            }
+          </p>
+          
+          <input
+            type="password"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="Kod (4-6 raqam)"
+            style={{
+              width: '200px',
+              padding: '16px',
+              background: '#0a0e27',
+              border: '2px solid #00d4ff',
+              borderRadius: '8px',
+              color: '#fff',
+              fontSize: '24px',
+              textAlign: 'center',
+              letterSpacing: '8px',
+              marginBottom: '16px'
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleCodeSubmit()
+              }
+            }}
+          />
+          
+          <button
+            onClick={handleCodeSubmit}
+            style={{
+              padding: '14px 32px',
+              background: '#00d4ff',
+              color: '#0a0e27',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '16px'
+            }}
+          >
+            {savedCode ? 'KIRISH' : 'O\'RNATISH'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const todaySchedule = getTodaySchedule()
+
+  return (
+    <div className="card">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2>🎓 MAKTAB</h2>
+        <button
+          onClick={() => setIsLocked(true)}
+          style={{
+            padding: '8px 16px',
+            background: '#ff0055',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '12px'
+          }}
+        >
+          🔒 YOPISH
+        </button>
+      </div>
+
+      <div style={{ marginBottom: '16px', padding: '12px', background: '#1a0000', borderRadius: '8px', borderLeft: '4px solid #ff0055' }}>
+        <p style={{ color: '#ff0055', fontSize: '14px', margin: 0 }}>
+          ⚠️ <strong>Eslatma:</strong> Kodni o'zgartirish uchun hozirgi maktab kodi va akkaunt parolingiz kerak bo'ladi.
+        </p>
+      </div>
+
+      {/* Kod o'zgartirish tugmasi */}
+      <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+        <button
+          onClick={() => setShowChangeCode(true)}
+          style={{
+            padding: '14px 28px',
+            background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            fontSize: '15px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '10px',
+            boxShadow: '0 4px 15px rgba(0, 212, 255, 0.3)',
+            transition: 'all 0.3s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)'
+            e.target.style.boxShadow = '0 6px 20px rgba(0, 212, 255, 0.4)'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)'
+            e.target.style.boxShadow = '0 4px 15px rgba(0, 212, 255, 0.3)'
+          }}
+        >
+          <Lock size={18} />
+          ✏️ KOD O'ZGARTIRISH
+        </button>
+      </div>
+
+      {/* Kod o'zgartirish modal */}
+      {showChangeCode && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#0a0e27',
+            border: '2px solid #ff00ff',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '90%'
+          }}>
+            <h3 style={{ color: '#ff00ff', marginTop: 0, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lock size={24} />
+              MAKTAB KODINI O'ZGARTIRISH
+            </h3>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: '#aaa', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                1. Hozirgi maktab kodi:
+              </label>
+              <input
+                type="password"
+                value={currentSchoolCode}
+                onChange={(e) => setCurrentSchoolCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="Hozirgi kod"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#16213e',
+                  border: '2px solid #0f3460',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: '#aaa', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                2. Akkaunt paroli (telefon paroli):
+              </label>
+              <input
+                type="password"
+                value={accountPassword}
+                onChange={(e) => setAccountPassword(e.target.value)}
+                placeholder="Akkaunt paroli"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#16213e',
+                  border: '2px solid #0f3460',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#aaa', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                3. Yangi maktab kodi (4-6 raqam):
+              </label>
+              <input
+                type="password"
+                value={newSchoolCode}
+                onChange={(e) => setNewSchoolCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="Yangi kod"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#16213e',
+                  border: '2px solid #0f3460',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handleChangeCode}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  boxShadow: '0 4px 15px rgba(0, 212, 255, 0.3)',
+                  transition: 'all 0.3s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 6px 20px rgba(0, 212, 255, 0.4)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 4px 15px rgba(0, 212, 255, 0.3)'
+                }}
+              >
+                ✏️ O'ZGARTIRISH
+              </button>
+              <button
+                onClick={() => {
+                  setShowChangeCode(false)
+                  setCurrentSchoolCode('')
+                  setAccountPassword('')
+                  setNewSchoolCode('')
+                }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'linear-gradient(135deg, #ff0055 0%, #cc0044 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  boxShadow: '0 4px 15px rgba(255, 0, 85, 0.3)',
+                  transition: 'all 0.3s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 6px 20px rgba(255, 0, 85, 0.4)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 4px 15px rgba(255, 0, 85, 0.3)'
+                }}
+              >
+                ✗ BEKOR QILISH
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Darsni tahrirlash modal */}
+      {editingLesson && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#0a0e27',
+            border: '2px solid #00d4ff',
+            borderRadius: '12px',
+            padding: '20px',
+            maxWidth: '400px',
+            width: '90%'
+          }}>
+            <h3 style={{ color: '#00d4ff', marginTop: 0 }}>DARSNI TAHRIRLASH</h3>
+            
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ color: '#aaa', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                Dars nomi:
+              </label>
+              <input
+                type="text"
+                value={editingLesson.subject}
+                onChange={(e) => setEditingLesson({ ...editingLesson, subject: e.target.value })}
+                placeholder="Dars nomi"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#16213e',
+                  border: '2px solid #0f3460',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: '#aaa', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+                Vaqt:
+              </label>
+              <input
+                type="text"
+                value={editingLesson.time}
+                onChange={(e) => setEditingLesson({ ...editingLesson, time: e.target.value })}
+                placeholder="08:00-08:45"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#16213e',
+                  border: '2px solid #0f3460',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={saveEditLesson}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#00ff88',
+                  color: '#0a0e27',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                SAQLASH
+              </button>
+              <button
+                onClick={() => setEditingLesson(null)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#ff0055',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                BEKOR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 1-4 sinf uchun haftalik jadval */}
+      {isEarlyGrade && (
+        <div style={{ marginBottom: '24px', background: '#0a0e27', borderRadius: '12px', padding: '20px', border: '2px solid #ffaa00' }}>
+          <h3 style={{ color: '#ffaa00', marginTop: 0, marginBottom: '16px' }}>
+            📅 HAFTALIK JADVAL ({schoolGrade}-sinf)
+          </h3>
+          
+          <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '12px' }}>
+            1-4 sinf o'quvchilari uchun haftalik jadval (Yakshanba dam olish):
+          </p>
+          
+          <textarea
+            value={weeklySchedule}
+            onChange={(e) => setWeeklySchedule(e.target.value)}
+            placeholder="Haftalik jadvalni kiriting...&#10;&#10;Dushanba:&#10;08:00 - Matematika&#10;09:00 - O'zbek tili&#10;...&#10;&#10;Seshanba:&#10;08:00 - Ingliz tili&#10;..."
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: '#16213e',
+              border: '2px solid #0f3460',
+              borderRadius: '8px',
+              color: '#fff',
+              fontSize: '14px',
+              minHeight: '200px',
+              resize: 'vertical',
+              fontFamily: 'monospace',
+              boxSizing: 'border-box',
+              whiteSpace: 'pre-wrap'
+            }}
+          />
+          
+          <button
+            onClick={saveWeeklySchedule}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: '#00ff88',
+              color: '#0a0e27',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              marginTop: '12px'
+            }}
+          >
+            SAQLASH
+          </button>
+        </div>
+      )}
+
+      {/* Bugungi darslar */}
+      <div style={{ marginBottom: '24px', background: '#0a0e27', borderRadius: '12px', padding: '20px', border: '2px solid #00d4ff' }}>
+        <h3 style={{ color: '#00d4ff', marginTop: 0, marginBottom: '16px' }}>
+          📅 BUGUNGI DARSLAR - {todaySchedule.day}
+        </h3>
+        
+        {todaySchedule.isRest ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ fontSize: '60px', marginBottom: '12px' }}>🎉</div>
+            <p style={{ color: '#00ff88', fontSize: '18px', fontWeight: 'bold' }}>
+              Bugun dam olish kuni!
+            </p>
+          </div>
+        ) : isEarlyGrade && weeklySchedule ? (
+          <div style={{ 
+            background: '#16213e', 
+            padding: '16px', 
+            borderRadius: '8px',
+            border: '2px solid #0f3460',
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'monospace',
+            color: '#fff',
+            fontSize: '14px'
+          }}>
+            {weeklySchedule}
+          </div>
+        ) : todaySchedule.lessons.length === 0 ? (
+          <p style={{ color: '#aaa', textAlign: 'center', padding: '20px' }}>
+            Bugun uchun darslar kiritilmagan
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {todaySchedule.lessons.map((lesson, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: '#16213e',
+                  border: '2px solid #0f3460',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <div>
+                  <p style={{ color: '#00d4ff', fontWeight: 'bold', margin: '0 0 4px 0' }}>
+                    {lesson.subject}
+                  </p>
+                  <p style={{ color: '#aaa', fontSize: '12px', margin: 0 }}>
+                    {lesson.time}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 6-11 sinf uchun kunlik jadval */}
+      {!isEarlyGrade && (
+        <div style={{ marginBottom: '24px' }}>
+          <h3 style={{ color: '#00d4ff', marginBottom: '16px' }}>
+            📚 DARS JADVALI (6-11 sinf)
+          </h3>
+          
+          {/* Kunlar */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto' }}>
+            {days.map(day => (
+              <button
+                key={day.id}
+                onClick={() => setActiveDay(day.id)}
+                style={{
+                  padding: '10px 16px',
+                  background: activeDay === day.id ? '#00d4ff' : '#16213e',
+                  color: activeDay === day.id ? '#0a0e27' : '#fff',
+                  border: `2px solid ${activeDay === day.id ? '#00d4ff' : '#0f3460'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '12px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {day.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Darslar ro'yxati */}
+          <div style={{ marginBottom: '16px' }}>
+            {schedule[activeDay] && schedule[activeDay].length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {schedule[activeDay].map((lesson, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      background: '#0a0e27',
+                      border: '2px solid #0f3460',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <p style={{ color: '#fff', fontWeight: 'bold', margin: '0 0 4px 0' }}>
+                        {lesson.subject}
+                      </p>
+                      <p style={{ color: '#aaa', fontSize: '12px', margin: 0 }}>
+                        {lesson.time}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => startEditLesson(activeDay, idx)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#00d4ff',
+                          color: '#0a0e27',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ✎ TAHRIRLASH
+                      </button>
+                      <button
+                        onClick={() => deleteLesson(activeDay, idx)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#ff0055',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        O'CHIRISH
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: '#aaa', textAlign: 'center', padding: '20px' }}>
+                Bu kun uchun darslar yo'q
+              </p>
+            )}
+          </div>
+
+          {/* Yangi dars qo'shish */}
+          <div style={{ background: '#16213e', padding: '16px', borderRadius: '8px', border: '2px solid #0f3460' }}>
+            <p style={{ color: '#00d4ff', fontWeight: 'bold', marginBottom: '12px' }}>
+              YANGI DARS QO'SHISH
+            </p>
+            
+            <input
+              type="text"
+              value={newLesson.subject}
+              onChange={(e) => setNewLesson({ ...newLesson, subject: e.target.value })}
+              placeholder="Dars nomi (Matematika, Ingliz tili...)"
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: '#0a0e27',
+                border: '2px solid #0f3460',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '14px',
+                marginBottom: '12px',
+                boxSizing: 'border-box'
+              }}
+            />
+            
+            <input
+              type="text"
+              value={newLesson.time}
+              onChange={(e) => setNewLesson({ ...newLesson, time: e.target.value })}
+              placeholder="Vaqt (08:00-08:45)"
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: '#0a0e27',
+                border: '2px solid #0f3460',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '14px',
+                marginBottom: '12px',
+                boxSizing: 'border-box'
+              }}
+            />
+            
+            <button
+              onClick={addLesson}
+              style={{
+                width: '100%',
+                padding: '14px',
+                background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '15px',
+                boxShadow: '0 4px 15px rgba(0, 212, 255, 0.3)',
+                transition: 'all 0.3s ease',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 6px 20px rgba(0, 212, 255, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 4px 15px rgba(0, 212, 255, 0.3)'
+              }}
+            >
+              ➕ QO'SHISH
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

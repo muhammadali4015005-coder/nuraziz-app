@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletic Coach</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-secondary { background: #e5e7eb; color: #374151; margin-top: 10px; }
+        .btn-secondary:hover { background: #d1d5db; }
+        .input { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+        .input:focus { outline: none; border-color: #3b82f6; }
+        .error { color: #dc2626; font-size: 12px; margin-top: 8px; display: none; }
+        .error.show { display: block; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h1 { font-size: 24px; color: #1f2937; }
+        .logout-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+        .session-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .session-card.morning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .session-card.evening { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .session-card h2 { font-size: 20px; margin-bottom: 15px; }
+        .session-stats { display: flex; justify-content: space-between; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 32px; font-weight: bold; }
+        .stat-label { font-size: 12px; opacity: 0.9; }
+        .exercise-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; border-left: 4px solid #3b82f6; }
+        .exercise-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .exercise-name { font-weight: bold; color: #1f2937; }
+        .exercise-reps { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-partial { background: #fef3c7; color: #92400e; }
+        .status-missed { background: #fee2e2; color: #991b1b; }
+        .delete-btn { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px; margin-top: 8px; }
+        .delete-btn:hover { color: #991b1b; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+        .text-center { text-align: center; }
+        .text-gray { color: #6b7280; }
+        .mt-8 { margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fade-in">
+        <div class="container" style="margin-top: 60px;">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 16px;">💪</div>
+                <h1 style="font-size: 28px; margin-bottom: 8px;">Athletic Coach</h1>
+                <p class="text-gray" style="margin-bottom: 32px;">AI-Powered Performance System</p>
+
+                <input type="tel" id="phone" placeholder="Telefon: +998 90 123 45 67" class="input">
+                <input type="password" id="pass" placeholder="Kod: 1234" class="input" onkeypress="if(event.key==='Enter') login()">
+                <button onclick="login()" class="btn btn-primary">Kirish</button>
+                <div id="error" class="error"></div>
+                <button onclick="showRegister()" class="btn btn-secondary">Yangi Akkaunt Yaratish</button>
+
+                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                    <p class="text-gray" style="font-size: 12px; margin-bottom: 8px;">Demo ma'lumotlar:</p>
+                    <p class="text-gray" style="font-size: 12px;">📱 +998 90 123 45 67 | 🔐 1234</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden">
+        <div class="container" style="padding-top: 20px;">
+            <!-- HEADER -->
+            <div class="header">
+                <div>
+                    <h1>💪 Athletic Coach</h1>
+                    <p class="text-gray" style="font-size: 12px; margin-top: 4px;">📱 <span id="user-phone"></span></p>
+                </div>
+                <button onclick="logout()" class="logout-btn" title="Chiqish">🚪</button>
+            </div>
+
+            <!-- SESSION CARDS -->
+            <div class="grid">
+                <div class="session-card morning">
+                    <h2>🌅 Morning</h2>
+                    <div class="session-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="morning-volume">0</div>
+                            <div class="stat-label">Volume</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="morning-completion">0%</div>
+                            <div class="stat-label">Completion</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="session-card evening">
+                    <h2>🌙 Evening</h2>
+                    <div class="session-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="evening-volume">0</div>
+                            <div class="stat-label">Volume</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="evening-completion">0%</div>
+                            <div class="stat-label">Completion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADD EXERCISE -->
+            <div class="card">
+                <h2 style="font-size: 18px; margin-bottom: 16px;">➕ Add Exercise</h2>
+                <input type="text" id="exercise-name" placeholder="Exercise name" class="input">
+                <input type="number" id="target-reps" placeholder="Target reps" class="input" min="1">
+                <input type="number" id="actual-reps" placeholder="Actual reps" class="input" min="0">
+                <select id="exercise-status" class="input" style="margin-bottom: 16px;">
+                    <option value="completed">✅ Completed</option>
+                    <option value="partial">⚠️ Partial</option>
+                    <option value="missed">❌ Missed</option>
+                </select>
+                <button onclick="addExercise()" class="btn btn-primary">Add Exercise</button>
+            </div>
+
+            <!-- EXERCISES LIST -->
+            <div id="exercises-list" class="text-center text-gray mt-8">
+                <p>No exercises logged yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ DATA MANAGER ============
+        const db = {
+            get: () => JSON.parse(localStorage.getItem('athletic_data') || '{}'),
+            set: (data) => localStorage.setItem('athletic_data', JSON.stringify(data)),
+            getCurrentUser: () => localStorage.getItem('athletic_current_user'),
+            setCurrentUser: (user) => localStorage.setItem('athletic_current_user', user),
+            clearCurrentUser: () => localStorage.removeItem('athletic_current_user')
+        };
+
+        // Initialize default user
+        function initDB() {
+            const data = db.get();
+            if (!data['+998 90 123 45 67']) {
+                data['+998 90 123 45 67'] = { pass: '1234', exercises: [] };
+                db.set(data);
+            }
+        }
+
+        // ============ AUTH FUNCTIONS ============
+        function login() {
+            const phone = document.getElementById('phone').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            
+            if (!phone || !pass) {
+                showError('Barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            const data = db.get();
+            const user = data[phone];
+
+            if (!user || user.pass !== pass) {
+                showError('Telefon yoki kod noto\'g\'ri!');
+                return;
+            }
+
+            db.setCurrentUser(phone);
+            showMainScreen();
+        }
+
+        function showRegister() {
+            const phone = prompt('Telefon raqami:');
+            if (!phone) return;
+
+            if (phone.length < 10) {
+                alert('Telefon raqami kamita 10 ta belgidan iborat bo\'lishi kerak!');
+                return;
+            }
+
+            const pass = prompt('Kod (4-6 raqam):');
+            if (!pass || pass.length < 4 || pass.length > 6) {
+                alert('Kod 4-6 ta raqamdan iborat bo\'lishi kerak!');
+                return;
+            }
+
+            const passConfirm = prompt('Kodni tasdiqlang:');
+            if (pass !== passConfirm) {
+                alert('Kodlar mos kelmadi!');
+                return;
+            }
+
+            const data = db.get();
+            if (data[phone]) {
+                alert('Bu raqam allaqachon ro\'yxatdan o\'tgan!');
+                return;
+            }
+
+            data[phone] = { pass: pass, exercises: [] };
+            db.set(data);
+            alert('✅ Akkaunt muvaffaqiyatli yaratildi!');
+        }
+
+        function logout() {
+            if (confirm('Chiqmoqchimisiz?')) {
+                db.clearCurrentUser();
+                location.reload();
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error');
+            errorEl.innerText = message;
+            errorEl.classList.add('show');
+            setTimeout(() => errorEl.classList.remove('show'), 3000);
+        }
+
+        // ============ EXERCISE FUNCTIONS ============
+        function addExercise() {
+            const name = document.getElementById('exercise-name').value.trim();
+            const target = document.getElementById('target-reps').value;
+            const actual = document.getElementById('actual-reps').value;
+            const status = document.getElementById('exercise-status').value;
+
+            if (!name || !target || !actual) {
+                alert('Barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            const currentUser = db.getCurrentUser();
+            const data = db.get();
+            const today = new Date().toISOString().split('T')[0];
+
+            data[currentUser].exercises.push({
+                id: Date.now(),
+                name: name,
+                target: parseInt(target),
+                actual: parseInt(actual),
+                status: status,
+                date: today
+            });
+
+            db.set(data);
+
+            document.getElementById('exercise-name').value = '';
+            document.getElementById('target-reps').value = '';
+            document.getElementById('actual-reps').value = '';
+            document.getElementById('exercise-status').value = 'completed';
+
+            updateDashboard();
+        }
+
+        function deleteExercise(id) {
+            if (confirm('Vazifani o\'chirmoqchimisiz?')) {
+                const currentUser = db.getCurrentUser();
+                const data = db.get();
+                data[currentUser].exercises = data[currentUser].exercises.filter(e => e.id !== id);
+                db.set(data);
+                updateDashboard();
+            }
+        }
+
+        // ============ UI FUNCTIONS ============
+        function showMainScreen() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+
+            const currentUser = db.getCurrentUser();
+            document.getElementById('user-phone').innerText = currentUser;
+
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const currentUser = db.getCurrentUser();
+            const data = db.get();
+            const today = new Date().toISOString().split('T')[0];
+            const exercises = data[currentUser].exercises.filter(e => e.date === today);
+
+            // Calculate metrics
+            const morningVolume = exercises.reduce((sum, e) => sum + e.actual, 0);
+            const completed = exercises.filter(e => e.status === 'completed').length;
+            const completion = exercises.length > 0 ? Math.round((completed / exercises.length) * 100) : 0;
+
+            // Update display
+            document.getElementById('morning-volume').innerText = morningVolume;
+            document.getElementById('morning-completion').innerText = completion + '%';
+            document.getElementById('evening-volume').innerText = '0';
+            document.getElementById('evening-completion').innerText = '0%';
+
+            // Render exercises
+            const listEl = document.getElementById('exercises-list');
+            if (exercises.length === 0) {
+                listEl.innerHTML = '<p class="text-gray">No exercises logged yet</p>';
+                return;
+            }
+
+            listEl.innerHTML = exercises.map(e => `
+                <div class="exercise-item">
+                    <div class="exercise-header">
+                        <div>
+                            <div class="exercise-name">${e.name}</div>
+                            <div class="exercise-reps">${e.actual}/${e.target} reps</div>
+                        </div>
+                        <span class="status-badge status-${e.status}">${e.status.toUpperCase()}</span>
+                    </div>
+                    <button onclick="deleteExercise(${e.id})" class="delete-btn">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+
+        // ============ INITIALIZATION ============
+        initDB();
+
+        if (db.getCurrentUser()) {
+            showMainScreen();
+        }
+    </script>
+</body>
+</html>

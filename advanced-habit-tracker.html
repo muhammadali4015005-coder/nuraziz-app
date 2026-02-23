@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Habit & Goal Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .heatmap-cell {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+        }
+
+        .heatmap-empty { background: #f3f4f6; }
+        .heatmap-low { background: #fecaca; }
+        .heatmap-medium { background: #fbbf24; }
+        .heatmap-high { background: #86efac; }
+
+        .streak-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .goal-progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 0.3s ease;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .ai-insight {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm fade-in">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">🎯</div>
+                <h1 class="text-3xl font-bold text-gray-800">Advanced Tracker</h1>
+                <p class="text-gray-500 mt-2">AI-powered goal achievement</p>
+            </div>
+
+            <div class="space-y-4">
+                <input 
+                    type="password" 
+                    id="pass-input" 
+                    placeholder="Maxfiy kod" 
+                    class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    onkeypress="if(event.key==='Enter') checkPass()"
+                >
+                <button 
+                    onclick="checkPass()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+                >
+                    Kirish
+                </button>
+                <p id="error-msg" class="text-red-500 text-sm text-center hidden">❌ Kod noto'g'ri!</p>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">Demo kod: <span class="font-mono font-bold">1234</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden min-h-screen pb-20">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            <!-- HEADER -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">🎯 Maqsadlar va Odatlar</h1>
+                    <p class="text-gray-500 text-sm mt-1" id="date-display"></p>
+                </div>
+                <button onclick="openSettings()" class="text-gray-600 hover:text-gray-800 text-2xl">⚙️</button>
+            </div>
+
+            <!-- TAB NAVIGATION -->
+            <div class="bg-white rounded-2xl shadow-lg p-4 mb-6 flex gap-4 overflow-x-auto">
+                <button class="tab-button active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="tab-button" onclick="switchTab('habits')">📋 Vazifalar</button>
+                <button class="tab-button" onclick="switchTab('goals')">🎯 Maqsadlar</button>
+                <button class="tab-button" onclick="switchTab('analytics')">📈 Analitika</button>
+                <button class="tab-button" onclick="switchTab('recommendations')">💡 Tavsiyalar</button>
+            </div>
+
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content">
+                <!-- TODAY'S PROGRESS -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">📅 Bugungi Progress</h2>
+                    <div class="flex justify-center mb-6">
+                        <svg width="150" height="150" class="progress-ring">
+                            <circle stroke="#e5e7eb" fill="transparent" stroke-width="8" r="54" cx="75" cy="75"/>
+                            <circle id="progress-circle-stroke" stroke="#3b82f6" fill="transparent" stroke-width="8" r="54" cx="75" cy="75" style="stroke-dasharray: 339.292; stroke-dashoffset: 0; transition: stroke-dashoffset 0.35s;"/>
+                            <text x="75" y="85" text-anchor="middle" class="text-2xl font-bold" id="progress-percent">0%</text>
+                        </svg>
+                    </div>
+                    <p class="text-center text-gray-600 font-medium" id="stat-text">Vazifalar qo'shing</p>
+                </div>
+
+                <!-- QUICK STATS -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-blue-600" id="total-habits">0</p>
+                        <p class="text-sm text-gray-600">Jami vazifa</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-green-600" id="completed-today">0</p>
+                        <p class="text-sm text-gray-600">Bugun bajarildi</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-purple-600" id="active-goals">0</p>
+                        <p class="text-sm text-gray-600">Faol maqsadlar</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-orange-600" id="current-streak">0</p>
+                        <p class="text-sm text-gray-600">Eng uzun streak</p>
+                    </div>
+                </div>
+
+                <!-- AI INSIGHTS -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🤖 AI Insights</h2>
+                    <div id="ai-insights-container">
+                        <p class="text-gray-500">7 kundan keyin AI tavsiyalari paydo bo'ladi...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HABITS TAB -->
+            <div id="tab-habits" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Yangi Vazifa Qo'shish</h2>
+                    <div class="flex gap-2 mb-4">
+                        <input 
+                            type="text" 
+                            id="habit-input" 
+                            placeholder="Vazifa nomini kiriting..." 
+                            class="flex-1 p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                            onkeypress="if(event.key==='Enter') addHabit()"
+                        >
+                        <button 
+                            onclick="addHabit()" 
+                            class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg"
+                        >
+                            ➕
+                        </button>
+                    </div>
+                </div>
+
+                <div id="habit-list" class="space-y-3">
+                    <div class="text-center text-gray-400 py-8">
+                        <p class="text-lg">📝 Hali vazifa yo'q</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GOALS TAB -->
+            <div id="tab-goals" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🎯 Yangi Maqsad Qo'shish</h2>
+                    <div class="space-y-3 mb-4">
+                        <input 
+                            type="text" 
+                            id="goal-title" 
+                            placeholder="Maqsad nomini kiriting..." 
+                            class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                        >
+                        <textarea 
+                            id="goal-description" 
+                            placeholder="Maqsad tavsifi..." 
+                            class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                            rows="3"
+                        ></textarea>
+                        <input 
+                            type="number" 
+                            id="goal-target-days" 
+                            placeholder="Necha kundan keyin erishmoqchisiz?" 
+                            class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                            min="1"
+                        >
+                        <button 
+                            onclick="addGoal()" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg"
+                        >
+                            Maqsad Qo'shish
+                        </button>
+                    </div>
+                </div>
+
+                <div id="goals-list" class="space-y-4">
+                    <div class="text-center text-gray-400 py-8">
+                        <p class="text-lg">🎯 Hali maqsad yo'q</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYTICS TAB -->
+            <div id="tab-analytics" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Haftalik Statistika</h2>
+                    <canvas id="weekly-chart" height="80"></canvas>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🔥 Streaklar</h2>
+                    <div id="streaks-list" class="space-y-3">
+                        <p class="text-gray-500">Streaklar ko'rsatiladi...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">📅 30 Kunlik Heatmap</h2>
+                    <div id="heatmap-container" class="flex flex-wrap gap-2">
+                        <!-- Heatmap cells will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECOMMENDATIONS TAB -->
+            <div id="tab-recommendations" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">💡 Personalized Recommendations</h2>
+                    <div id="recommendations-container">
+                        <p class="text-gray-500">7 kundan keyin tavsiyalar paydo bo'ladi...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Sozlamalar</h2>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Yangi Kod O'rnatish</label>
+                    <input 
+                        type="password" 
+                        id="new-pass-input" 
+                        placeholder="Yangi kod" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    >
+                </div>
+                <button 
+                    onclick="changePassword()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg"
+                >
+                    Kodni O'zgartirish
+                </button>
+            </div>
+
+            <div class="space-y-2 mb-6 border-t pt-4">
+                <button 
+                    onclick="exportData()" 
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm"
+                >
+                    📥 Ma'lumotlarni Yuklab Olish
+                </button>
+                <button 
+                    onclick="clearAllData()" 
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-sm"
+                >
+                    🗑️ Barcha Ma'lumotlarni O'chirish
+                </button>
+            </div>
+
+            <button 
+                onclick="closeSettings()" 
+                class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 rounded-lg"
+            >
+                Yopish
+            </button>
+        </div>
+    </div>
+
+    <script src="data-manager.js"></script>
+    <script src="ai-engine.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

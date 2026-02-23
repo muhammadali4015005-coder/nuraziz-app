@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletic Performance Coach - Standalone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .session-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .session-card.morning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .session-card.evening {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .exercise-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.2s;
+        }
+
+        .exercise-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-partial { background: #fef3c7; color: #92400e; }
+        .status-missed { background: #fee2e2; color: #991b1b; }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #9ca3af;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm fade-in">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">💪</div>
+                <h1 class="text-3xl font-bold text-gray-800">Athletic Coach</h1>
+                <p class="text-gray-500 mt-2">AI-Powered Performance System</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="input-group">
+                    <label>Telefon Raqami</label>
+                    <input type="tel" id="phone-input" placeholder="+998 XX XXX XX XX">
+                </div>
+
+                <div class="input-group">
+                    <label>Maxfiy Kod</label>
+                    <input type="password" id="pass-input" placeholder="4-6 raqamli kod" onkeypress="if(event.key==='Enter') login()">
+                </div>
+
+                <button onclick="login()" class="w-full btn btn-primary">Kirish</button>
+                <p id="error-msg" class="text-red-500 text-sm text-center hidden"></p>
+
+                <button onclick="showRegister()" class="w-full bg-gray-200 text-gray-800 font-bold py-2 rounded-lg">Yangi Akkaunt</button>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center mb-2">Demo:</p>
+                <p class="text-xs text-gray-600 text-center">📱 +998 90 123 45 67 | 🔐 1234</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden min-h-screen pb-20">
+        <div class="max-w-2xl mx-auto px-4 py-6">
+            <!-- HEADER -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">💪 Athletic Coach</h1>
+                    <p class="text-gray-600 text-xs mt-1" id="user-info">📱 User: <span id="current-phone"></span></p>
+                </div>
+                <button onclick="logout()" class="text-red-600 hover:text-red-800 text-2xl" title="Chiqish">🚪</button>
+            </div>
+
+            <!-- DASHBOARD -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="session-card morning">
+                    <h2 class="text-2xl font-bold mb-4">🌅 Morning</h2>
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-sm opacity-90">Volume</p>
+                            <p class="text-3xl font-bold" id="morning-volume">0</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm opacity-90">Completion</p>
+                            <p class="text-3xl font-bold" id="morning-completion">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="session-card evening">
+                    <h2 class="text-2xl font-bold mb-4">🌙 Evening</h2>
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-sm opacity-90">Volume</p>
+                            <p class="text-3xl font-bold" id="evening-volume">0</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm opacity-90">Completion</p>
+                            <p class="text-3xl font-bold" id="evening-completion">0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADD EXERCISE -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Add Exercise</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="input-group">
+                        <label>Exercise Name</label>
+                        <input type="text" id="exercise-name" placeholder="e.g., Pull-ups">
+                    </div>
+                    <div class="input-group">
+                        <label>Target Reps</label>
+                        <input type="number" id="target-reps" placeholder="e.g., 100" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Actual Reps</label>
+                        <input type="number" id="actual-reps" placeholder="e.g., 85" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Status</label>
+                        <select id="exercise-status">
+                            <option value="completed">✅ Completed</option>
+                            <option value="partial">⚠️ Partial</option>
+                            <option value="missed">❌ Missed</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="addExercise()" class="w-full btn btn-primary">Add Exercise</button>
+            </div>
+
+            <!-- EXERCISES LIST -->
+            <div id="exercises-list" class="space-y-3">
+                <p class="text-gray-500 text-center py-8">No exercises logged yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ DATA MANAGER ============
+        class DataManager {
+            constructor() {
+                this.USERS_KEY = 'athletic_users_standalone';
+                this.CURRENT_USER_KEY = 'athletic_current_user_standalone';
+                this.init();
+            }
+
+            init() {
+                if (!localStorage.getItem(this.USERS_KEY)) {
+                    const defaultUsers = {
+                        '+998 90 123 45 67': {
+                            phone: '+998 90 123 45 67',
+                            pass: '1234',
+                            exercises: []
+                        }
+                    };
+                    localStorage.setItem(this.USERS_KEY, JSON.stringify(defaultUsers));
+                }
+            }
+
+            registerUser(phone, pass) {
+                const users = JSON.parse(localStorage.getItem(this.USERS_KEY));
+                if (users[phone]) {
+                    return { success: false, message: 'Bu raqam allaqachon ro\'yxatdan o\'tgan!' };
+                }
+                users[phone] = { phone, pass, exercises: [] };
+                localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+                return { success: true, message: 'Akkaunt yaratildi!' };
+            }
+
+            loginUser(phone, pass) {
+                const users = JSON.parse(localStorage.getItem(this.USERS_KEY));
+                const user = users[phone];
+                if (!user || user.pass !== pass) {
+                    return { success: false, message: 'Telefon yoki kod noto\'g\'ri!' };
+                }
+                localStorage.setItem(this.CURRENT_USER_KEY, phone);
+                return { success: true };
+            }
+
+            logoutUser() {
+                localStorage.removeItem(this.CURRENT_USER_KEY);
+            }
+
+            getCurrentUser() {
+                return localStorage.getItem(this.CURRENT_USER_KEY);
+            }
+
+            addExercise(name, targetReps, actualReps, status) {
+                const currentUser = this.getCurrentUser();
+                const users = JSON.parse(localStorage.getItem(this.USERS_KEY));
+                users[currentUser].exercises.push({
+                    id: Date.now(),
+                    name, targetReps: parseInt(targetReps), actualReps: parseInt(actualReps), status,
+                    date: new Date().toISOString().split('T')[0]
+                });
+                localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+            }
+
+            getExercises() {
+                const currentUser = this.getCurrentUser();
+                const users = JSON.parse(localStorage.getItem(this.USERS_KEY));
+                return users[currentUser]?.exercises || [];
+            }
+
+            deleteExercise(id) {
+                const currentUser = this.getCurrentUser();
+                const users = JSON.parse(localStorage.getItem(this.USERS_KEY));
+                users[currentUser].exercises = users[currentUser].exercises.filter(e => e.id !== id);
+                localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+            }
+        }
+
+        const dm = new DataManager();
+
+        // ============ UI FUNCTIONS ============
+        function login() {
+            const phone = document.getElementById('phone-input').value.trim();
+            const pass = document.getElementById('pass-input').value.trim();
+            
+            if (!phone || !pass) {
+                showError('Barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            const result = dm.loginUser(phone, pass);
+            if (result.success) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-screen').classList.remove('hidden');
+                document.getElementById('current-phone').innerText = phone;
+                updateDashboard();
+            } else {
+                showError(result.message);
+            }
+        }
+
+        function logout() {
+            if (confirm('Chiqmoqchimisiz?')) {
+                dm.logoutUser();
+                document.getElementById('main-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('phone-input').value = '';
+                document.getElementById('pass-input').value = '';
+            }
+        }
+
+        function showRegister() {
+            const phone = prompt('Telefon raqami:');
+            if (!phone) return;
+            const pass = prompt('Kod (4-6 raqam):');
+            if (!pass) return;
+            const passConfirm = prompt('Kodni tasdiqlang:');
+            if (pass !== passConfirm) {
+                alert('Kodlar mos kelmadi!');
+                return;
+            }
+            const result = dm.registerUser(phone, pass);
+            alert(result.message);
+        }
+
+        function addExercise() {
+            const name = document.getElementById('exercise-name').value;
+            const target = document.getElementById('target-reps').value;
+            const actual = document.getElementById('actual-reps').value;
+            const status = document.getElementById('exercise-status').value;
+
+            if (!name || !target || !actual) {
+                alert('Barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            dm.addExercise(name, target, actual, status);
+            document.getElementById('exercise-name').value = '';
+            document.getElementById('target-reps').value = '';
+            document.getElementById('actual-reps').value = '';
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const exercises = dm.getExercises();
+            const today = new Date().toISOString().split('T')[0];
+            const todayExercises = exercises.filter(e => e.date === today);
+
+            const completed = todayExercises.filter(e => e.status === 'completed').length;
+            const total = todayExercises.length;
+            const completion = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            const morningVolume = todayExercises.reduce((sum, e) => sum + e.actualReps, 0);
+
+            document.getElementById('morning-volume').innerText = morningVolume;
+            document.getElementById('morning-completion').innerText = completion + '%';
+            document.getElementById('evening-volume').innerText = '0';
+            document.getElementById('evening-completion').innerText = '0%';
+
+            renderExercises(todayExercises);
+        }
+
+        function renderExercises(exercises) {
+            const list = document.getElementById('exercises-list');
+            if (exercises.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-8">No exercises logged yet</p>';
+                return;
+            }
+
+            list.innerHTML = exercises.map(e => `
+                <div class="exercise-item">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-gray-800">${e.name}</h3>
+                            <p class="text-sm text-gray-600">${e.actualReps}/${e.targetReps} reps</p>
+                        </div>
+                        <span class="status-badge status-${e.status}">${e.status.toUpperCase()}</span>
+                    </div>
+                    <button onclick="deleteExercise(${e.id})" class="text-red-500 hover:text-red-700 text-sm mt-2">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteExercise(id) {
+            if (confirm('Delete this exercise?')) {
+                dm.deleteExercise(id);
+                updateDashboard();
+            }
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.innerText = message;
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+        }
+    </script>
+</body>
+</html>

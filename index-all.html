@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 NURAZIZ - ALL VERSIONS</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🏆</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --dark: #0a0e27;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --success: #00d4ff;
+            --warning: #ffa500;
+            --danger: #ff0055;
+        }
+        html, body { 
+            height: 100%; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--dark); 
+            color: #fff; 
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        .header {
+            background: linear-gradient(90deg, var(--accent) 0%, var(--success) 100%);
+            padding: 40px;
+            margin-bottom: 40px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .header h1 { font-size: 48px; margin-bottom: 10px; }
+        .header p { font-size: 18px; margin-bottom: 5px; }
+        
+        .versions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .version-card {
+            background: var(--secondary);
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .version-card:hover {
+            border-color: var(--success);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .version-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .version-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--success);
+            margin-bottom: 15px;
+        }
+        
+        .version-desc {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .version-features {
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        
+        .feature {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--accent);
+        }
+        
+        .feature:last-child { border-bottom: none; }
+        
+        .btn-open {
+            width: 100%;
+            padding: 15px;
+            background: var(--success);
+            color: var(--dark);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-open:hover {
+            background: #00a8cc;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        
+        .btn-exit {
+            padding: 15px 30px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn-exit:hover {
+            background: #ff0055;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
+        }
+        
+        .demo-section {
+            background: var(--secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-title {
+            font-size: 24px;
+            color: var(--success);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .demo-box {
+            background: var(--dark);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        
+        .demo-label {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .demo-value {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--warning);
+            font-family: monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .versions-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 NURAZIZ</h1>
+            <p>AI-POWERED ATHLETIC COACHING SYSTEM</p>
+            <p style="font-size: 14px; margin-top: 15px; color: rgba(255,255,255,0.8);">Barcha versiyalar bir joyda</p>
+        </div>
+
+        <!-- DEMO CREDENTIALS -->
+        <div class="demo-section">
+            <div class="demo-title">📱 DEMO AKKAUNT</div>
+            <div class="demo-box">
+                <div class="demo-label">TELEFON:</div>
+                <div class="demo-value">+998 90 123 45 67</div>
+            </div>
+            <div class="demo-box">
+                <div class="demo-label">KOD:</div>
+                <div class="demo-value">1234</div>
+            </div>
+            <p style="font-size: 12px; color: #aaa; margin-top: 15px;">
+                <i class="fas fa-info-circle"></i> Yangi akkaunt yaratish uchun "YANGI AKKAUNT" tugmasini bosing
+            </p>
+        </div>
+
+        <!-- VERSIONS -->
+        <div class="versions-grid">
+            <!-- VERSION 1: NURAZIZ SCHEDULE -->
+            <div class="version-card">
+                <div class="version-icon">🕐</div>
+                <div class="version-title">NURAZIZ SCHEDULE</div>
+                <div class="version-desc">Kunlik jadval va vazifa tracker</div>
+                <div class="version-features">
+                    <div class="feature">✅ Kunlik jadval (04:00-22:00)</div>
+                    <div class="feature">✅ Vazifalarni belgilash</div>
+                    <div class="feature">✅ Tugatish foizi</div>
+                    <div class="feature">✅ Multi-user system</div>
+                </div>
+                <button class="btn-open" onclick="window.location.href='nuraziz-schedule.html'">
+                    <i class="fas fa-arrow-right"></i> OCHISH
+                </button>
+            </div>
+
+            <!-- VERSION 2: ULTIMATE COACH -->
+            <div class="version-card">
+                <div class="version-icon">🏆</div>
+                <div class="version-title">ULTIMATE COACH</div>
+                <div class="version-desc">AI-powered habit tracker</div>
+                <div class="version-features">
+                    <div class="feature">✅ Kunlik tracker</div>
+                    <div class="feature">✅ Haftalik statistika</div>
+                    <div class="feature">✅ Maqsadlar va ETA</div>
+                    <div class="feature">✅ AI tahlili</div>
+                </div>
+                <button class="btn-open" onclick="window.location.href='ultimate-coach.html'">
+                    <i class="fas fa-arrow-right"></i> OCHISH
+                </button>
+            </div>
+
+            <!-- VERSION 3: ADVANCED INDEX -->
+            <div class="version-card">
+                <div class="version-icon">⚡</div>
+                <div class="version-title">MONSTER AI</div>
+                <div class="version-desc">Ertalab + Kechqurun sessiyalari</div>
+                <div class="version-features">
+                    <div class="feature">✅ Dual-phase workouts</div>
+                    <div class="feature">✅ Monster Gauges</div>
+                    <div class="feature">✅ ETA prediction</div>
+                    <div class="feature">✅ Confidence scoring</div>
+                </div>
+                <button class="btn-open" onclick="window.location.href='advanced-index.html'">
+                    <i class="fas fa-arrow-right"></i> OCHISH
+                </button>
+            </div>
+
+            <!-- VERSION 4: MONSTER MODE -->
+            <div class="version-card">
+                <div class="version-icon">🔴</div>
+                <div class="version-title">MONSTER MODE</div>
+                <div class="version-desc">Aggressive aesthetic design</div>
+                <div class="version-features">
+                    <div class="feature">✅ Neon effects</div>
+                    <div class="feature">✅ War Room Dashboard</div>
+                    <div class="feature">✅ Aggressive UI</div>
+                    <div class="feature">✅ Monster aesthetic</div>
+                </div>
+                <button class="btn-open" onclick="window.location.href='monster-mode.html'">
+                    <i class="fas fa-arrow-right"></i> OCHISH
+                </button>
+            </div>
+        </div>
+
+        <!-- INSTRUCTIONS -->
+        <div class="demo-section">
+            <div class="demo-title">📖 QANDAY FOYDALANISH</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="demo-box">
+                    <div class="demo-label">1️⃣ VERSIYANI TANLANG</div>
+                    <div style="font-size: 14px; color: #ccc; margin-top: 10px;">
+                        Yuqoridagi 4 ta versiyadan birini tanlang va "OCHISH" tugmasini bosing
+                    </div>
+                </div>
+                <div class="demo-box">
+                    <div class="demo-label">2️⃣ KIRING</div>
+                    <div style="font-size: 14px; color: #ccc; margin-top: 10px;">
+                        Demo telefon va kod bilan kiring yoki yangi akkaunt yarating
+                    </div>
+                </div>
+                <div class="demo-box">
+                    <div class="demo-label">3️⃣ FOYDALANING</div>
+                    <div style="font-size: 14px; color: #ccc; margin-top: 10px;">
+                        Vazifalarni qo'shing, belgilang va taraqqiyotni kuzatish
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="demo-section">
+            <div class="demo-title">✨ ASOSIY XUSUSIYATLAR</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div class="demo-box">
+                    <i class="fas fa-users" style="font-size: 24px; color: var(--success); margin-bottom: 10px;"></i>
+                    <div style="font-weight: 700;">Multi-user System</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Har bir foydalanuvchi o'z ma'lumotiga ega</div>
+                </div>
+                <div class="demo-box">
+                    <i class="fas fa-lock" style="font-size: 24px; color: var(--success); margin-bottom: 10px;"></i>
+                    <div style="font-weight: 700;">Secure Login</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Telefon + Passcode authentication</div>
+                </div>
+                <div class="demo-box">
+                    <i class="fas fa-brain" style="font-size: 24px; color: var(--success); margin-bottom: 10px;"></i>
+                    <div style="font-weight: 700;">AI Analytics</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">ETA prediction va insights</div>
+                </div>
+                <div class="demo-box">
+                    <i class="fas fa-chart-bar" style="font-size: 24px; color: var(--success); margin-bottom: 10px;"></i>
+                    <div style="font-weight: 700;">Statistics</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Kunlik va haftalik taraqqiyot</div>
+                </div>
+                <div class="demo-box">
+                    <i class="fas fa-mobile-alt" style="font-size: 24px; color: var(--success); margin-bottom: 10px;"></i>
+                    <div style="font-weight: 700;">Responsive</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Mobile + Desktop optimized</div>
+                </div>
+                <div class="demo-box">
+                    <i class="fas fa-database" style="font-size: 24px; color: var(--success); margin-bottom: 10px;"></i>
+                    <div style="font-weight: 700;">LocalStorage</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Barcha ma'lumotlar saqlandi</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="text-align: center; padding: 40px 0; border-top: 2px solid var(--accent); margin-top: 40px;">
+            <p style="font-size: 14px; color: #aaa;">
+                <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                Barcha versiyalar production-ready va error-free
+            </p>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                🏆 NURAZIZ - AI-Powered Athletic Coaching System
+            </p>
+            <button class="btn-exit" onclick="if(confirm('Chiqish?')) { window.close(); }">
+                <i class="fas fa-power-off"></i> CHIQISH
+            </button>
+        </div>
+    </div>
+</body>
+</html>

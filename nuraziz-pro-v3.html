@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NURAZIZ - Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #0f3460 0%, #00d4ff 100%);
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* BURGER MENU */
+        .burger {
+            background: #00d4ff;
+            color: #0a0e27;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .burger:hover {
+            transform: scale(1.1);
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: -320px;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: #16213e;
+            border-right: 2px solid #0f3460;
+            padding: 24px;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+        
+        .overlay.show {
+            display: block;
+        }
+        
+        .close-btn {
+            width: 100%;
+            background: #ff0055;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .user-info {
+            padding: 16px;
+            background: #0a0e27;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .user-info p {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+        
+        .user-info .phone {
+            font-size: 16px;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .user-info .name {
+            font-size: 14px;
+            color: #fff;
+            margin-top: 8px;
+        }
+        
+        /* MENU SECTIONS */
+        .menu-section {
+            margin-bottom: 24px;
+        }
+        
+        .menu-section-title {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .menu-btn {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            background: #16213e;
+            border: 2px solid #0f3460;
+            color: #00d4ff;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .menu-btn:hover {
+            background: #0f3460;
+            border-color: #00d4ff;
+        }
+        
+        .menu-btn.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            color: #0a0e27;
+            border-color: #00d4ff;
+        }
+        
+        .menu-divider {
+            border: none;
+            border-top: 1px solid #0f3460;
+            margin: 20px 0;
+        }
+        
+        /* CARDS */
+        .card {
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        /* INPUTS */
+        .input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #0a0e27;
+            border: 2px solid #0f3460;
+            color: #00d4ff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+        
+        /* BUTTONS */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            color: #0a0e27;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-sec {
+            background: transparent;
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+        }
+        
+        .btn-sec:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+        
+        /* ITEMS */
+        .item {
+            background: #0a0e27;
+            border-left: 4px solid #00d4ff;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .item:hover {
+            transform: translateX(4px);
+            border-left-width: 6px;
+        }
+        
+        .item.completed {
+            border-left-color: #00ff88;
+            opacity: 0.7;
+        }
+        
+        .item.partial {
+            border-left-color: #ffaa00;
+        }
+        
+        /* PROGRESS BAR */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #0a0e27;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff 0%, #00ff88 100%);
+            transition: width 0.3s;
+        }
+        
+        /* STAT CARDS */
+        .stat-card {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #0f3460;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* GRID */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        /* MODAL */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);">
+            <div class="card" style="max-width: 450px; width: 90%;">
+                <div id="login-form">
+                    <h1 style="text-align: center; margin-bottom: 40px; color: #00d4ff; font-size: 48px; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);">NURAZIZ</h1>
+                    <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Pro Versiya - Burger Menyu</p>
+                    
+                    <input type="text" id="phone" placeholder="Telefon raqam" class="input" autocomplete="off" inputmode="numeric">
+                    <input type="password" id="pass" placeholder="Parol" class="input" autocomplete="off">
+                    
+                    <button onclick="login()" class="btn">KIRISH</button>
+                    <button onclick="showRegister()" class="btn btn-sec">YANGI AKKAUNT</button>
+                    
+                    <div style="margin-top: 20px; padding: 16px; background: #0a0e27; border-radius: 8px; border-left: 4px solid #00d4ff;">
+                        <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Demo:</p>
+                        <p style="font-size: 14px; color: #00d4ff;">📱 +998 90 123 45 67</p>
+                        <p style="font-size: 14px; color: #00d4ff;">🔑 1234</p>
+                    </div>
+                </div>
+                
+                <div id="register-form" class="hidden">
+                    <h2 style="text-align: center; margin-bottom: 30px; color: #00d4ff;">YANGI AKKAUNT</h2>
+                    
+                    <input type="text" id="reg-name" placeholder="Ismingiz" class="input" autocomplete="off">
+                    <input type="text" id="reg-phone" placeholder="Telefon raqam" class="input" autocomplete="off" inputmode="numeric">
+                    <input type="password" id="reg-pass" placeholder="Parol" class="input" autocomplete="off">
+                    <input type="password" id="reg-pass2" placeholder="Parolni tasdiqlang" class="input" autocomplete="off">
+                    
+                    <button onclick="registerUser()" class="btn">YARATISH</button>
+                    <button onclick="backToLogin()" class="btn btn-sec">ORQAGA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden">
+        <!-- HEADER -->
+        <div class="header">
+            <button class="burger" onclick="toggleSidebar()">☰</button>
+            <h1>NURAZIZ</h1>
+            <button onclick="logout()" style="background: #ff0055; color: #fff; border: none; cursor: pointer; font-weight: bold; padding: 12px 18px; border-radius: 8px; transition: all 0.3s;">CHIQISH</button>
+        </div>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+        
+        <!-- SIDEBAR MENU -->
+        <div class="sidebar" id="sidebar">
+            <button class="close-btn" onclick="closeSidebar()">✕ YOPISH</button>
+            
+            <div class="user-info">
+                <p>Foydalanuvchi:</p>
+                <p class="phone" id="user-phone"></p>
+                <p class="name" id="user-name"></p>
+            </div>
+            
+            <!-- ASOSIY BO'LIMLAR -->
+            <div class="menu-section">
+                <p class="menu-section-title">📋 Asosiy Bo'limlar</p>
+                <button class="menu-btn active" onclick="switchTab('dashboard'); closeSidebar();">📊 DASHBOARD</button>
+                <button class="menu-btn" onclick="switchTab('schedule'); closeSidebar();">📅 KUNLIK JADVAL</button>
+                <button class="menu-btn" onclick="switchTab('morning'); closeSidebar();">🌅 ERTALAB</button>
+                <button class="menu-btn" onclick="switchTab('evening'); closeSidebar();">🌙 KECHQURUN</button>
+                <button class="menu-btn" onclick="switchTab('goals'); closeSidebar();">🎯 MAQSADLAR</button>
+                <button class="menu-btn" onclick="switchTab('nutrition'); closeSidebar();">🍎 OVQAT</button>
+            </div>
+            
+            <hr class="menu-divider">
+            
+            <!-- TAHLIL -->
+            <div class="menu-section">
+                <p class="menu-section-title">📊 Tahlil va Hisobotlar</p>
+                <button class="menu-btn" onclick="switchTab('insights'); closeSidebar();">🤖 AI MASLAHATLAR</button>
+                <button class="menu-btn" onclick="switchTab('video'); closeSidebar();">🎥 VIDEO MASLAHAT</button>
+                <button class="menu-btn" onclick="switchTab('forecast'); closeSidebar();">🔮 KELAJAK PROGNOZ</button>
+                <button class="menu-btn" onclick="switchTab('weekly'); closeSidebar();">📈 HAFTALIK</button>
+                <button class="menu-btn" onclick="switchTab('stats'); closeSidebar();">📊 STATISTIKA</button>
+            </div>
+            
+            <hr class="menu-divider">
+            
+            <!-- SOZLAMALAR -->
+            <div class="menu-section">
+                <p class="menu-section-title">⚙️ Sozlamalar</p>
+                <button class="menu-btn" onclick="switchTab('settings'); closeSidebar();">⚙️ ASOSIY SOZLAMALAR</button>
+                <button class="menu-btn" onclick="switchTab('profile'); closeSidebar();">👤 PROFIL</button>
+                <button class="menu-btn" onclick="switchTab('notifications'); closeSidebar();">🔔 BILDIRISHNOMALAR</button>
+                <button class="menu-btn" onclick="switchTab('theme'); closeSidebar();">🎨 TEMA</button>
+                <button class="menu-btn" onclick="switchTab('privacy'); closeSidebar();">🔒 XAVFSIZLIK</button>
+            </div>
+            
+            <hr class="menu-divider">
+            
+            <!-- ADMIN -->
+            <div class="menu-section">
+                <p class="menu-section-title">👨‍💼 Admin</p>
+                <button class="menu-btn" onclick="switchTab('admin'); closeSidebar();">⚙️ ADMIN PANEL</button>
+                <button class="menu-btn" onclick="switchTab('users'); closeSidebar();">👥 FOYDALANUVCHILAR</button>
+                <button class="menu-btn" onclick="switchTab('pricing'); closeSidebar();">💰 NARX</button>
+            </div>
+            
+            <hr class="menu-divider">
+            
+            <!-- YANGI AKKAUNT -->
+            <div class="menu-section">
+                <button class="menu-btn" style="background: #00ff88; color: #0a0e27; border-color: #00ff88;" onclick="switchTab('newaccount'); closeSidebar();">➕ YANGI AKKAUNT</button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTAINER -->
+        <div class="container">
+
+            <!-- DASHBOARD TAB -->
+            <div id="dashboard-tab">
+                <div class="card">
+                    <h2>📊 DASHBOARD</h2>
+                    
+                    <div class="grid-4" style="margin-bottom: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="dash-workouts">0</div>
+                            <div class="stat-label">Mashqlar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="dash-goals">0</div>
+                            <div class="stat-label">Maqsadlar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="dash-calories">0</div>
+                            <div class="stat-label">Kaloriya</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="dash-rate">0%</div>
+                            <div class="stat-label">Bajarilish</div>
+                        </div>
+                    </div>
+                    
+                    <div id="dashboard-content"></div>
+                </div>
+            </div>
+
+            <!-- SCHEDULE TAB -->
+            <div id="schedule-tab" class="hidden">
+                <div class="card">
+                    <h2>📅 KUNLIK JADVAL</h2>
+                    
+                    <div class="grid-2" style="margin-bottom: 16px;">
+                        <input type="time" id="schedule-time" class="input">
+                        <input type="text" id="schedule-task" class="input" placeholder="Vazifa nomi">
+                    </div>
+                    
+                    <button onclick="addSchedule()" class="btn">➕ QO'SHISH</button>
+                    <div id="schedule-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- MORNING TAB -->
+            <div id="morning-tab" class="hidden">
+                <div class="card">
+                    <h2>🌅 ERTALAB MASHQLARI</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 16px;">
+                        <input type="date" id="morning-date" class="input">
+                        <input type="text" id="morning-name" class="input" placeholder="Mashq nomi">
+                        <input type="number" id="morning-target" class="input" placeholder="Maqsad" min="1">
+                    </div>
+                    
+                    <button onclick="addMorning()" class="btn">➕ QO'SHISH</button>
+                    <div id="morning-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- EVENING TAB -->
+            <div id="evening-tab" class="hidden">
+                <div class="card">
+                    <h2>🌙 KECHQURUN MASHQLARI</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 16px;">
+                        <input type="date" id="evening-date" class="input">
+                        <input type="text" id="evening-name" class="input" placeholder="Mashq nomi">
+                        <input type="number" id="evening-weight" class="input" placeholder="Og'irlik (kg)" min="0">
+                    </div>
+                    
+                    <button onclick="addEvening()" class="btn">➕ QO'SHISH</button>
+                    <div id="evening-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- GOALS TAB -->
+            <div id="goals-tab" class="hidden">
+                <div class="card">
+                    <h2>🎯 MAQSADLAR</h2>
+                    
+                    <div class="grid-2" style="margin-bottom: 16px;">
+                        <input type="text" id="goal-name" class="input" placeholder="Maqsad nomi">
+                        <input type="number" id="goal-target" class="input" placeholder="Maqsad raqami" min="1">
+                    </div>
+                    
+                    <button onclick="addGoal()" class="btn">➕ QO'SHISH</button>
+                    <div id="goals-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- NUTRITION TAB -->
+            <div id="nutrition-tab" class="hidden">
+                <div class="card">
+                    <h2>🍎 OVQATLANISH REJASI</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 16px;">
+                        <input type="text" id="food-name" class="input" placeholder="Ovqat nomi">
+                        <input type="number" id="food-calories" class="input" placeholder="Kaloriya" min="0">
+                        <input type="time" id="food-time" class="input">
+                    </div>
+                    
+                    <button onclick="addFood()" class="btn">➕ QO'SHISH</button>
+                    
+                    <div id="nutrition-list" style="margin-top: 20px;"></div>
+                    
+                    <div style="margin-top: 24px; padding: 20px; background: #0a0e27; border-radius: 8px; border-left: 4px solid #00ff88;">
+                        <p style="font-size: 14px; color: #aaa; margin-bottom: 8px;">Bugungi Kaloriya:</p>
+                        <p style="font-size: 32px; color: #00ff88; font-weight: bold;" id="total-calories">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI INSIGHTS TAB -->
+            <div id="insights-tab" class="hidden">
+                <div class="card">
+                    <h2>🤖 AI MASLAHATLAR</h2>
+                    <div id="insights-list"></div>
+                    <button onclick="generateInsights()" class="btn" style="margin-top: 20px;">🔄 YANGILASH</button>
+                </div>
+            </div>
+
+            <!-- VIDEO MASLAHAT TAB -->
+            <div id="video-tab" class="hidden">
+                <div class="card">
+                    <h2>🎥 VIDEO MASLAHATLAR</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <select id="video-category" class="input" style="margin-bottom: 12px;">
+                            <option value="">Kategoriya tanlang</option>
+                            <option value="morning">Ertalab Mashqlari</option>
+                            <option value="evening">Kechqurun Mashqlari</option>
+                            <option value="nutrition">Ovqatlanish</option>
+                            <option value="stretching">Cho'zish</option>
+                            <option value="cardio">Kardio</option>
+                        </select>
+                        <button onclick="loadVideos()" class="btn">🔍 QIDIRISH</button>
+                    </div>
+                    
+                    <div id="video-list"></div>
+                </div>
+            </div>
+
+            <!-- KELAJAK PROGNOZ TAB -->
+            <div id="forecast-tab" class="hidden">
+                <div class="card">
+                    <h2>🔮 KELAJAK PROGNOZ</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <select id="forecast-days" class="input" style="margin-bottom: 12px;">
+                            <option value="7">7 kun</option>
+                            <option value="14">14 kun</option>
+                            <option value="30">30 kun</option>
+                        </select>
+                        <button onclick="generateForecast()" class="btn">📈 PROGNOZ OLISH</button>
+                    </div>
+                    
+                    <div id="forecast-list"></div>
+                </div>
+            </div>
+
+            <!-- WEEKLY TAB -->
+            <div id="weekly-tab" class="hidden">
+                <div class="card">
+                    <h2>📈 HAFTALIK NATIJALAR</h2>
+                    
+                    <div class="grid-2" style="margin-bottom: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="weekly-morning">0</div>
+                            <div class="stat-label">Ertalab</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="weekly-evening">0</div>
+                            <div class="stat-label">Kechqurun</div>
+                        </div>
+                    </div>
+                    
+                    <div id="weekly-list"></div>
+                </div>
+            </div>
+
+            <!-- STATS TAB -->
+            <div id="stats-tab" class="hidden">
+                <div class="card">
+                    <h2>📊 STATISTIKA</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-workouts">0</div>
+                            <div class="stat-label">Jami Mashqlar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-goals">0</div>
+                            <div class="stat-label">Maqsadlar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="completion-rate">0%</div>
+                            <div class="stat-label">Bajarilish</div>
+                        </div>
+                    </div>
+                    
+                    <div id="stats-list"></div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settings-tab" class="hidden">
+                <div class="card">
+                    <h2>⚙️ ASOSIY SOZLAMALAR</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Kunlik Maqsad (Kaloriya)</label>
+                        <input type="number" id="setting-daily-calories" class="input" placeholder="2000" min="0">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Ertalab Maqsadi</label>
+                        <input type="number" id="setting-morning-goal" class="input" placeholder="5" min="0">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Kechqurun Maqsadi</label>
+                        <input type="number" id="setting-evening-goal" class="input" placeholder="5" min="0">
+                    </div>
+                    
+                    <button onclick="saveSettings()" class="btn">💾 SAQLASH</button>
+                </div>
+            </div>
+
+            <!-- PROFILE TAB -->
+            <div id="profile-tab" class="hidden">
+                <div class="card">
+                    <h2>👤 PROFIL</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Ism</label>
+                        <input type="text" id="profile-name" class="input">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Telefon</label>
+                        <input type="text" id="profile-phone" class="input" disabled>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Yosh</label>
+                        <input type="number" id="profile-age" class="input" placeholder="25" min="0">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Vazn (kg)</label>
+                        <input type="number" id="profile-weight" class="input" placeholder="70" min="0" step="0.1">
+                    </div>
+                    
+                    <button onclick="saveProfile()" class="btn">💾 SAQLASH</button>
+                </div>
+            </div>
+
+            <!-- NOTIFICATIONS TAB -->
+            <div id="notifications-tab" class="hidden">
+                <div class="card">
+                    <h2>🔔 BILDIRISHNOMALAR</h2>
+                    
+                    <div style="margin-bottom: 16px; padding: 16px; background: #0a0e27; border-radius: 8px;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" id="notif-morning" checked>
+                            <span>Ertalab mashqlari uchun</span>
+                        </label>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px; padding: 16px; background: #0a0e27; border-radius: 8px;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" id="notif-evening" checked>
+                            <span>Kechqurun mashqlari uchun</span>
+                        </label>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px; padding: 16px; background: #0a0e27; border-radius: 8px;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" id="notif-goals" checked>
+                            <span>Maqsadlar uchun</span>
+                        </label>
+                    </div>
+                    
+                    <button onclick="saveNotifications()" class="btn">💾 SAQLASH</button>
+                </div>
+            </div>
+
+            <!-- THEME TAB -->
+            <div id="theme-tab" class="hidden">
+                <div class="card">
+                    <h2>🎨 TEMA</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Tema Tanlang</label>
+                        <select id="theme-select" class="input">
+                            <option value="dark">Qorongi (Dark)</option>
+                            <option value="light">Yorug' (Light)</option>
+                            <option value="blue">Moviy (Blue)</option>
+                            <option value="green">Yashil (Green)</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="saveTheme()" class="btn">💾 SAQLASH</button>
+                </div>
+            </div>
+
+            <!-- PRIVACY TAB -->
+            <div id="privacy-tab" class="hidden">
+                <div class="card">
+                    <h2>🔒 XAVFSIZLIK</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Yangi Parol</label>
+                        <input type="password" id="privacy-new-pass" class="input" placeholder="Yangi parol">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Parolni Tasdiqlang</label>
+                        <input type="password" id="privacy-confirm-pass" class="input" placeholder="Tasdiqlang">
+                    </div>
+                    
+                    <button onclick="changePassword()" class="btn">🔐 PAROLNI O'ZGARTIRISH</button>
+                    
+                    <hr style="border: none; border-top: 1px solid #0f3460; margin: 24px 0;">
+                    
+                    <button onclick="deleteAccount()" class="btn" style="background: #ff0055; border-color: #ff0055;">🗑️ AKKAUNTNI O'CHIRISH</button>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL TAB -->
+            <div id="admin-tab" class="hidden">
+                <div class="card">
+                    <h2>⚙️ ADMIN PANEL</h2>
+                    
+                    <div style="padding: 16px; background: #ff0055; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 14px; font-weight: bold;">⚠️ Faqat adminlar uchun!</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="color: #00d4ff; margin-bottom: 16px;">Narx Sozlamalari</h3>
+                        <div class="grid-2" style="margin-bottom: 12px;">
+                            <input type="number" id="admin-price" class="input" placeholder="Oylik narx (so'm)" min="0">
+                            <input type="number" id="admin-discount" class="input" placeholder="Chegirma (%)" min="0" max="100">
+                        </div>
+                        <button onclick="savePriceSettings()" class="btn">💾 SAQLASH</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- USERS TAB -->
+            <div id="users-tab" class="hidden">
+                <div class="card">
+                    <h2>👥 FOYDALANUVCHILAR</h2>
+                    
+                    <button onclick="loadUsers()" class="btn btn-sec" style="margin-bottom: 16px;">🔄 YANGILASH</button>
+                    <div id="admin-users-list"></div>
+                </div>
+            </div>
+
+            <!-- PRICING TAB -->
+            <div id="pricing-tab" class="hidden">
+                <div class="card">
+                    <h2>💰 NARX SOZLAMALARI</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Oylik Narx (so'm)</label>
+                        <input type="number" id="pricing-monthly" class="input" placeholder="50000" min="0">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Yillik Narx (so'm)</label>
+                        <input type="number" id="pricing-yearly" class="input" placeholder="500000" min="0">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Chegirma (%)</label>
+                        <input type="number" id="pricing-discount" class="input" placeholder="10" min="0" max="100">
+                    </div>
+                    
+                    <button onclick="savePricing()" class="btn">💾 SAQLASH</button>
+                </div>
+            </div>
+
+            <!-- NEW ACCOUNT TAB -->
+            <div id="newaccount-tab" class="hidden">
+                <div class="card">
+                    <h2>➕ YANGI AKKAUNT YARATISH</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Ism</label>
+                        <input type="text" id="new-name" class="input" placeholder="Ismingiz">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Telefon</label>
+                        <input type="text" id="new-phone" class="input" placeholder="Telefon raqam" inputmode="numeric">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Parol</label>
+                        <input type="password" id="new-pass" class="input" placeholder="Parol (4-6 raqam)">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 8px; color: #00d4ff; font-weight: bold;">Parolni Tasdiqlang</label>
+                        <input type="password" id="new-pass2" class="input" placeholder="Tasdiqlang">
+                    </div>
+                    
+                    <button onclick="createNewAccount()" class="btn">✅ YARATISH</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5003';
+        let currentUser = null;
+        let userData = null;

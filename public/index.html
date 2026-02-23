@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vaqtni Boshqarish</title>
+    <script>
+      // ULTIMATE NOTIFICATION BLOCKING - IMMEDIATE EXECUTION
+      (function() {
+        // Complete notification blocking function
+        const blockNotifications = function() {
+          try {
+            // Delete Notification class
+            delete window.Notification;
+            
+            // Redefine Notification as undefined
+            Object.defineProperty(window, 'Notification', {
+              get: () => undefined,
+              set: () => {},
+              writable: false,
+              configurable: false
+            });
+            
+            // Block ServiceWorkerRegistration notification methods
+            if (window.ServiceWorkerRegistration) {
+              const originalShow = ServiceWorkerRegistration.prototype.showNotification;
+              if (originalShow) {
+                ServiceWorkerRegistration.prototype.showNotification = () => 
+                  Promise.reject('Notifications disabled');
+              }
+            }
+            
+            // Block permissions.query for notifications
+            if (navigator && navigator.permissions && navigator.permissions.query) {
+              const orig = navigator.permissions.query;
+              navigator.permissions.query = function(params) {
+                if (params && (params.name === 'notifications' || params.name === 'notification')) {
+                  return Promise.resolve({ state: 'denied', onchange: null });
+                }
+                return orig(params);
+              };
+            }
+            
+            // Block PushManager
+            if (window.PushManager) {
+              try {
+                PushManager.prototype.subscribe = () => Promise.reject('Push disabled');
+                PushManager.prototype.getSubscription = () => Promise.resolve(null);
+              } catch (e) {}
+            }
+            
+            // Unregister all service workers
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations()
+                .then(regs => regs.forEach(r => r.unregister()))
+                .catch(() => {});
+            }
+            
+            // Block all browser dialogs
+            window.alert = () => {};
+            window.confirm = () => false;
+            window.prompt = () => null;
+          } catch (e) {
+            // Silent fail
+          }
+        };
+        
+        // Run immediately
+        blockNotifications();
+        
+        // Run on various events
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', blockNotifications);
+        }
+        window.addEventListener('load', blockNotifications);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>NURAZIZ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #0a0e27; color: #fff; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: #16213e; border: 2px solid #0f3460; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .input { width: 100%; padding: 10px; margin-bottom: 10px; background: #0a0e27; border: 2px solid #0f3460; color: #00d4ff; border-radius: 6px; }
+        .btn { width: 100%; padding: 10px; margin-bottom: 10px; background: #00d4ff; color: #0a0e27; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn:hover { background: #00a8cc; }
+        .btn-sec { background: transparent; border: 2px solid #00d4ff; color: #00d4ff; }
+        .btn-sec:hover { background: #00d4ff; color: #0a0e27; }
+        .item { background: #0a0e27; border-left: 4px solid #00d4ff; padding: 10px; margin-bottom: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .tab-btn { padding: 10px 15px; background: #16213e; border: 2px solid #0f3460; color: #00d4ff; font-weight: bold; cursor: pointer; border-radius: 6px; margin-right: 10px; margin-bottom: 10px; }
+        .tab-btn.active { background: #00d4ff; color: #0a0e27; }
+        .header { background: linear-gradient(90deg, #0f3460 0%, #00d4ff 100%); padding: 20px; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 32px; margin: 0; flex: 1; text-align: center; }
+        .hidden { display: none !important; }
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100vh; background: #16213e; border-right: 2px solid #0f3460; padding: 20px; overflow-y: auto; transition: left 0.3s; z-index: 1000; }
+        .sidebar.open { left: 0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
+        .overlay.show { display: block; }
+        .burger { background: #00d4ff; color: #0a0e27; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 18px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);">
+            <div class="card" style="max-width: 400px;">
+                <div id="login-form">
+                    <h1 style="text-align: center; margin-bottom: 30px; color: #00d4ff;">NURAZIZ</h1>
+                    <form onsubmit="login(); return false;">
+                        <input type="text" id="phone" placeholder="Telefon" class="input" autocomplete="off" inputmode="numeric">
+                        <input type="password" id="pass" placeholder="Kod" class="input" autocomplete="off">
+                        <button type="submit" class="btn">KIRISH</button>
+                        <button type="button" onclick="showRegister()" class="btn btn-sec">YANGI AKKAUNT</button>
+                    </form>
+                </div>
+                <div id="register-form" class="hidden">
+                    <h2 style="text-align: center; margin-bottom: 20px; color: #00d4ff;">YANGI AKKAUNT</h2>
+                    <form onsubmit="registerUser(); return false;">
+                        <input type="text" id="reg-phone" placeholder="Telefon" class="input" autocomplete="off" inputmode="numeric">
+                        <input type="password" id="reg-pass" placeholder="Kod (4-6)" class="input" autocomplete="off">
+                        <input type="password" id="reg-pass2" placeholder="Tasdiqlang" class="input" autocomplete="off">
+                        <button type="submit" class="btn">YARATISH</button>
+                        <button type="button" onclick="backToLogin()" class="btn btn-sec">ORQAGA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-screen" class="hidden">
+        <div class="header">
+            <h1>NURAZIZ</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="burger" onclick="toggleSidebar()">☰</button>
+                <button onclick="logout()" style="background: #ff0055; color: #fff; border: none; cursor: pointer; font-weight: bold; padding: 10px 15px; border-radius: 6px;">CHIQISH</button>
+            </div>
+        </div>
+
+        <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <button onclick="closeSidebar()" style="width: 100%; background: #ff0055; color: #fff; border: none; padding: 10px; border-radius: 6px; margin-bottom: 20px; cursor: pointer; font-weight: bold;">✕ YOPISH</button>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;"><span id="user-phone"></span></p>
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('schedule'); closeSidebar();">KUNLIK JADVAL</button>
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('morning'); closeSidebar();">ERTALAB</button>
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('evening'); closeSidebar();">KECHQURUN</button>
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('goals'); closeSidebar();">MAQSADLAR</button>
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('insights'); closeSidebar();">AI MASLAHAT</button>
+            <hr style="border: none; border-top: 1px solid #0f3460; margin: 15px 0;">
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('weekly'); closeSidebar();">HAFTALIK</button>
+            <button class="tab-btn" style="width: 100%; text-align: left;" onclick="switchTab('stats'); closeSidebar();">STATISTIKA</button>
+        </div>
+
+        <div class="container">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="tab-btn active" onclick="switchTab('schedule')">KUNLIK JADVAL</button>
+                <button class="tab-btn" onclick="switchTab('morning')">ERTALAB</button>
+                <button class="tab-btn" onclick="switchTab('evening')">KECHQURUN</button>
+                <button class="tab-btn" onclick="switchTab('goals')">MAQSADLAR</button>
+                <button class="tab-btn" onclick="switchTab('insights')">AI MASLAHAT</button>
+            </div>
+
+            <div id="schedule-tab">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">KUNLIK JADVAL</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <input type="time" id="schedule-time" class="input">
+                        <input type="text" id="schedule-task" class="input" placeholder="Vazifa nomi">
+                    </div>
+                    <button onclick="addSchedule()" class="btn">QO'SHISH</button>
+                    <div id="schedule-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <div id="morning-tab" class="hidden">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">ERTALAB</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <input type="date" id="morning-date" class="input">
+                        <input type="text" id="morning-name" class="input" placeholder="Mashq nomi">
+                        <input type="number" id="morning-target" class="input" placeholder="Maqsad" min="1">
+                    </div>
+                    <button onclick="addMorning()" class="btn">QO'SHISH</button>
+                    <div id="morning-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <div id="evening-tab" class="hidden">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">KECHQURUN</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <input type="date" id="evening-date" class="input">
+                        <input type="text" id="evening-name" class="input" placeholder="Mashq nomi">
+                        <input type="number" id="evening-weight" class="input" placeholder="Og'irlik (kg)" min="0">
+                    </div>
+                    <button onclick="addEvening()" class="btn">QO'SHISH</button>
+                    <div id="evening-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <div id="goals-tab" class="hidden">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">MAQSADLAR</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="goal-name" class="input" placeholder="Maqsad nomi">
+                        <input type="number" id="goal-target" class="input" placeholder="Maqsad" min="1">
+                    </div>
+                    <button onclick="addGoal()" class="btn">QO'SHISH</button>
+                    <div id="goals-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <div id="insights-tab" class="hidden">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">AI MASLAHATLAR</h2>
+                    <div id="insights-list"></div>
+                </div>
+            </div>
+
+            <div id="weekly-tab" class="hidden">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">HAFTALIK NATIJALAR</h2>
+                    <div id="weekly-list"></div>
+                </div>
+            </div>
+
+            <div id="stats-tab" class="hidden">
+                <div class="card">
+                    <h2 style="color: #00d4ff; margin-bottom: 15px;">STATISTIKA</h2>
+                    <div id="stats-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const db = {
+            user: () => localStorage.getItem('nuraziz_user'),
+            setUser: (u) => localStorage.setItem('nuraziz_user', u),
+            clear: () => { localStorage.removeItem('nuraziz_user'); }
+        };
+
+        let userData = null;
+
+        async function loadUserData() {
+            const phone = db.user();
+            if (!phone) return null;
+            
+            try {
+                const response = await fetch('/api/get-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                const result = await response.json();
+                if (result.success && result.user) {
+                    userData = result.user;
+                    return userData;
+                }
+            } catch (err) {
+                console.error('Error loading user:', err);
+            }
+            return null;
+        }
+
+        async function saveUserData() {
+            if (!userData) return;
+            try {
+                await fetch('/api/save-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+            } catch (err) {
+                console.error('Error saving user:', err);
+            }
+        }
+
+        function formatPhone(input) {
+            if (!input) return;
+            let val = input.value.replace(/\D/g, '');
+            if (val.length > 12) val = val.slice(0, 12);
+            let formatted = '';
+            if (val.length > 0) formatted = '+' + val.slice(0, 3);
+            if (val.length > 3) formatted += ' ' + val.slice(3, 5);
+            if (val.length > 5) formatted += ' ' + val.slice(5, 8);
+            if (val.length > 8) formatted += ' ' + val.slice(8, 10);
+            if (val.length > 10) formatted += ' ' + val.slice(10, 12);
+            input.value = formatted;
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('show');
+        }
+
+        async function login(event) {
+            if (event) event.preventDefault();
+            const p = document.getElementById('phone').value.trim();
+            const pw = document.getElementById('pass').value.trim();
+            if (!p || !pw) { alert('Hammasini to\'ldiring'); return; }
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: p, pass: pw })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    db.setUser(p);
+                    userData = result.user;
+                    show();
+                } else {
+                    alert('Noto\'g\'ri telefon yoki kod');
+                }
+            } catch (err) {
+                alert('Xatolik yuz berdi');
+                console.error(err);
+            }
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        function backToLogin() {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+
+        async function registerUser(event) {
+            if (event) event.preventDefault();
+            const p = document.getElementById('reg-phone').value.trim();
+            const pw = document.getElementById('reg-pass').value.trim();
+            const pw2 = document.getElementById('reg-pass2').value.trim();
+            if (!p || !pw || !pw2) { alert('Hammasini to\'ldiring'); return; }
+            if (pw.length < 4 || pw.length > 6) { alert('Kod 4-6 raqam bo\'lishi kerak'); return; }
+            if (pw !== pw2) { alert('Kodlar mos emas'); return; }
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: p, pass: pw })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Akkaunt yaratildi!');
+                    backToLogin();
+                } else if (result.error === 'exists') {
+                    alert('Bu telefon allaqachon ro\'yxatdan o\'tgan');
+                } else {
+                    alert('Xatolik yuz berdi');
+                }
+            } catch (err) {
+                alert('Xatolik yuz berdi');
+                console.error(err);
+            }
+        }
+
+        function logout() {
+            if (confirm('Chiqish?')) { 
+                db.clear();
+                userData = null;
+                location.reload(); 
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('[id$="-tab"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tab + '-tab').classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            event.target.closest('.tab-btn').classList.add('active');
+            update();
+        }
+
+        async function addSchedule() {
+            const time = document.getElementById('schedule-time').value;
+            const task = document.getElementById('schedule-task').value.trim();
+            if (!time || !task) { alert('Hammasini to\'ldiring'); return; }
+            
+            if (!userData.schedule) userData.schedule = {};
+            const today = new Date().toISOString().split('T')[0];
+            if (!userData.schedule[today]) userData.schedule[today] = [];
+            userData.schedule[today].push({ id: Date.now(), time, name: task, completed: false });
+            
+            await saveUserData();
+            document.getElementById('schedule-time').value = '';
+            document.getElementById('schedule-task').value = '';
+            update();
+        }
+
+        async function deleteSchedule(id) {
+            const today = new Date().toISOString().split('T')[0];
+            userData.schedule[today] = userData.schedule[today].filter(t => t.id !== id);
+            await saveUserData();
+            update();
+        }
+
+        async function addMorning() {
+            const date = document.getElementById('morning-date').value;
+            const name = document.getElementById('morning-name').value.trim();
+            const target = parseInt(document.getElementById('morning-target').value) || 0;
+            if (!date || !name || !target) { alert('Hammasini to\'ldiring'); return; }
+            
+            if (!userData.morning) userData.morning = [];
+            userData.morning.push({ id: Date.now(), name, target, actual: 0, status: 'pending', date: date });
+            
+            await saveUserData();
+            document.getElementById('morning-date').value = '';
+            document.getElementById('morning-name').value = '';
+            document.getElementById('morning-target').value = '';
+            update();
+        }
+
+        async function editMorning(id) {
+            const m = userData.morning.find(x => x.id === id);
+            if (!m) return;
+            const actual = prompt('Qilgan:', m.actual);
+            if (actual !== null) {
+                m.actual = parseInt(actual) || 0;
+                m.status = m.actual >= m.target ? 'completed' : m.actual > 0 ? 'partial' : 'pending';
+                await saveUserData();
+                update();
+            }
+        }
+
+        async function deleteMorning(id) {
+            userData.morning = userData.morning.filter(x => x.id !== id);
+            await saveUserData();
+            update();
+        }
+
+        async function addEvening() {
+            const date = document.getElementById('evening-date').value;
+            const name = document.getElementById('evening-name').value.trim();
+            const weight = parseInt(document.getElementById('evening-weight').value) || 0;
+            if (!date || !name || !weight) { alert('Hammasini to\'ldiring'); return; }
+            
+            if (!userData.evening) userData.evening = [];
+            userData.evening.push({ id: Date.now(), name, weight, sets: 0, reps: 0, actual: 0, status: 'pending', date: date });
+            
+            await saveUserData();
+            document.getElementById('evening-date').value = '';
+            document.getElementById('evening-name').value = '';
+            document.getElementById('evening-weight').value = '';
+            update();
+        }
+
+        async function editEvening(id) {
+            const e = userData.evening.find(x => x.id === id);
+            if (!e) return;
+            const actual = prompt('Qilgan:', e.actual);
+            if (actual !== null) {
+                e.actual = parseInt(actual) || 0;
+                e.status = e.actual > 0 ? 'completed' : 'pending';
+                await saveUserData();
+                update();
+            }
+        }
+
+        async function deleteEvening(id) {
+            userData.evening = userData.evening.filter(x => x.id !== id);
+            await saveUserData();
+            update();
+        }
+
+        async function addGoal() {
+            const name = document.getElementById('goal-name').value.trim();
+            const target = parseInt(document.getElementById('goal-target').value) || 0;
+            if (!name || !target) { alert('Hammasini to\'ldiring'); return; }
+            
+            if (!userData.goals) userData.goals = [];
+            userData.goals.push({ id: Date.now(), name, target, current: 0, days: 30 });
+            
+            await saveUserData();
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
+            update();
+        }
+
+        async function editGoal(id) {
+            const g = userData.goals.find(x => x.id === id);
+            if (!g) return;
+            const current = prompt('Joriy:', g.current);
+            if (current !== null) {
+                g.current = parseInt(current) || 0;
+                await saveUserData();
+                update();
+            }
+        }
+
+        async function deleteGoal(id) {
+            userData.goals = userData.goals.filter(x => x.id !== id);
+            await saveUserData();
+            update();
+        }
+
+        function update() {
+            if (!userData) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+
+            const scheduleList = document.getElementById('schedule-list');
+            const schedule = userData.schedule[today] || [];
+            schedule.sort((a, b) => a.time.localeCompare(b.time));
+            scheduleList.innerHTML = schedule.length > 0 ? schedule.map(t => `<div class="item"><span>${t.time} ${t.name}</span><button onclick="deleteSchedule(${t.id})" style="background: #ff0055; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">O'chirish</button></div>`).join('') : '<div class="item"><span>Vazifalar yo\'q</span></div>';
+
+            const morningList = document.getElementById('morning-list');
+            const morning = userData.morning || [];
+            morningList.innerHTML = morning.length > 0 ? morning.map(m => `<div class="item"><span>${m.date} ${m.name}: ${m.actual}/${m.target}</span><div><button onclick="editMorning(${m.id})" style="background: #00d4ff; color: #0a0e27; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Tahrir</button><button onclick="deleteMorning(${m.id})" style="background: #ff0055; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">O'chirish</button></div></div>`).join('') : '<div class="item"><span>Mashqlar yo\'q</span></div>';
+
+            const eveningList = document.getElementById('evening-list');
+            const evening = userData.evening || [];
+            eveningList.innerHTML = evening.length > 0 ? evening.map(e => `<div class="item"><span>${e.date} ${e.name}: ${e.weight}kg (${e.actual})</span><div><button onclick="editEvening(${e.id})" style="background: #00d4ff; color: #0a0e27; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Tahrir</button><button onclick="deleteEvening(${e.id})" style="background: #ff0055; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">O'chirish</button></div></div>`).join('') : '<div class="item"><span>Mashqlar yo\'q</span></div>';
+
+            const goalsList = document.getElementById('goals-list');
+            const goals = userData.goals || [];
+            goalsList.innerHTML = goals.length > 0 ? goals.map(g => `<div class="item"><span>${g.name}: ${g.current}/${g.target}</span><div><button onclick="editGoal(${g.id})" style="background: #00d4ff; color: #0a0e27; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Tahrir</button><button onclick="deleteGoal(${g.id})" style="background: #ff0055; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">O'chirish</button></div></div>`).join('') : '<div class="item"><span>Maqsadlar yo\'q</span></div>';
+
+            const insightsList = document.getElementById('insights-list');
+            const completedMorning = morning.filter(m => m.status === 'completed').length;
+            const completedEvening = evening.filter(e => e.status === 'completed').length;
+            insightsList.innerHTML = `<div class="item"><span>Ertalab: ${completedMorning}/${morning.length}</span></div><div class="item"><span>Kechqurun: ${completedEvening}/${evening.length}</span></div>`;
+
+            const weeklyList = document.getElementById('weekly-list');
+            let weekStats = { morning: 0, evening: 0 };
+            for (let i = 0; i < 7; i++) {
+                const d2 = new Date(); d2.setDate(d2.getDate() - i);
+                const dateStr = d2.toISOString().split('T')[0];
+                weekStats.morning += userData.morning.filter(m => m.date === dateStr && m.status === 'completed').length;
+                weekStats.evening += userData.evening.filter(e => e.date === dateStr && e.status === 'completed').length;
+            }
+            weeklyList.innerHTML = `<div class="item"><span>Ertalab (7 kun): ${weekStats.morning}</span></div><div class="item"><span>Kechqurun (7 kun): ${weekStats.evening}</span></div>`;
+
+            const statsList = document.getElementById('stats-list');
+            const currentMonth = new Date().getMonth();
+            let monthStats = { morning: 0, evening: 0 };
+            for (let i = 0; i < 30; i++) {
+                const d2 = new Date(); d2.setDate(d2.getDate() - i);
+                if (d2.getMonth() !== currentMonth) break;
+                const dateStr = d2.toISOString().split('T')[0];
+                monthStats.morning += userData.morning.filter(m => m.date === dateStr && m.status === 'completed').length;
+                monthStats.evening += userData.evening.filter(e => e.date === dateStr && e.status === 'completed').length;
+            }
+            statsList.innerHTML = `<div class="item"><span>Ertalab (bu oy): ${monthStats.morning}</span></div><div class="item"><span>Kechqurun (bu oy): ${monthStats.evening}</span></div>`;
+        }
+
+        function show() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('user-phone').innerText = db.user();
+            update();
+        }
+
+        window.addEventListener('load', async function() {
+            document.getElementById('phone').value = '';
+            document.getElementById('pass').value = '';
+            document.getElementById('phone').addEventListener('input', function() { formatPhone(this); });
+            document.getElementById('reg-phone').addEventListener('input', function() { formatPhone(this); });
+            
+            if (db.user()) {
+                await loadUserData();
+                if (userData) {
+                    show();
+                } else {
+                    db.clear();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

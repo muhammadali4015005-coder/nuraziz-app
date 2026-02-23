@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletic Performance Coach - AI Powered</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .session-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .session-card.morning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .session-card.evening {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .exercise-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.2s;
+        }
+
+        .exercise-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-partial { background: #fef3c7; color: #92400e; }
+        .status-missed { background: #fee2e2; color: #991b1b; }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            stroke-dasharray: 339.292;
+            stroke-dashoffset: 0;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .eta-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .confidence-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s ease;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #9ca3af;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .insight-card {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .volume-chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm fade-in">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">💪</div>
+                <h1 class="text-3xl font-bold text-gray-800">Athletic Coach</h1>
+                <p class="text-gray-500 mt-2">AI-Powered Performance System</p>
+            </div>
+
+            <!-- LOGIN TAB -->
+            <div id="login-tab" class="space-y-4">
+                <div class="input-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telefon Raqami</label>
+                    <input 
+                        type="tel" 
+                        id="phone-input" 
+                        placeholder="+998 XX XXX XX XX" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                        onkeypress="if(event.key==='Enter') checkPass()"
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maxfiy Kod</label>
+                    <input 
+                        type="password" 
+                        id="pass-input" 
+                        placeholder="4-6 raqamli kod" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                        onkeypress="if(event.key==='Enter') checkPass()"
+                    >
+                </div>
+
+                <button 
+                    onclick="checkPass()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+                >
+                    Kirish
+                </button>
+                <p id="error-msg" class="text-red-500 text-sm text-center hidden">❌ Kod yoki raqam noto'g'ri!</p>
+
+                <button 
+                    onclick="switchToRegister()" 
+                    class="w-full bg-gray-200 text-gray-800 font-bold py-2 rounded-lg hover:bg-gray-300 transition text-sm"
+                >
+                    Yangi Akkaunt Yaratish
+                </button>
+            </div>
+
+            <!-- REGISTER TAB -->
+            <div id="register-tab" class="space-y-4 hidden">
+                <h3 class="text-lg font-bold text-gray-800 text-center mb-4">Yangi Akkaunt</h3>
+                
+                <div class="input-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telefon Raqami</label>
+                    <input 
+                        type="tel" 
+                        id="reg-phone-input" 
+                        placeholder="+998 XX XXX XX XX" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maxfiy Kod</label>
+                    <input 
+                        type="password" 
+                        id="reg-pass-input" 
+                        placeholder="4-6 raqamli kod" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kodni Tasdiqlang</label>
+                    <input 
+                        type="password" 
+                        id="reg-pass-confirm-input" 
+                        placeholder="Kodni qayta kiriting" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    >
+                </div>
+
+                <button 
+                    onclick="registerUser()" 
+                    class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+                >
+                    Akkaunt Yaratish
+                </button>
+                <p id="register-error-msg" class="text-red-500 text-sm text-center hidden"></p>
+
+                <button 
+                    onclick="switchToLogin()" 
+                    class="w-full bg-gray-200 text-gray-800 font-bold py-2 rounded-lg hover:bg-gray-300 transition text-sm"
+                >
+                    Orqaga
+                </button>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center mb-2">Demo ma'lumotlar:</p>
+                <p class="text-xs text-gray-600 text-center">Telefon: <span class="font-mono font-bold">+998 90 123 45 67</span></p>
+                <p class="text-xs text-gray-600 text-center">Kod: <span class="font-mono font-bold">1234</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden min-h-screen pb-20">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <!-- HEADER -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">💪 Athletic Performance Coach</h1>
+                    <p class="text-gray-500 text-sm mt-1" id="date-display"></p>
+                    <p class="text-gray-600 text-xs mt-1" id="user-info">📱 User: <span id="current-phone">+998 90 123 45 67</span></p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openSettings()" class="text-gray-600 hover:text-gray-800 text-2xl">⚙️</button>
+                    <button onclick="logout()" class="text-red-600 hover:text-red-800 text-2xl" title="Chiqish">🚪</button>
+                </div>
+            </div>
+
+            <!-- TAB NAVIGATION -->
+            <div class="bg-white rounded-2xl shadow-lg p-4 mb-6 flex gap-4 overflow-x-auto">
+                <button class="tab-button active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="tab-button" onclick="switchTab('morning')">🌅 Morning</button>
+                <button class="tab-button" onclick="switchTab('evening')">🌙 Evening</button>
+                <button class="tab-button" onclick="switchTab('goals')">🎯 Goals</button>
+                <button class="tab-button" onclick="switchTab('analytics')">📈 Analytics</button>
+                <button class="tab-button" onclick="switchTab('coaching')">🤖 Coaching</button>
+            </div>
+
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content">
+                <!-- TODAY'S OVERVIEW -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- MORNING SESSION -->
+                    <div class="session-card morning">
+                        <h2 class="text-2xl font-bold mb-4">🌅 Morning Calisthenics</h2>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm opacity-90">Total Volume</p>
+                                <p class="text-3xl font-bold" id="morning-volume">0</p>
+                                <p class="text-xs opacity-75">reps</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-90">Completion</p>
+                                <p class="text-3xl font-bold" id="morning-completion">0%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EVENING SESSION -->
+                    <div class="session-card evening">
+                        <h2 class="text-2xl font-bold mb-4">🌙 Evening Bodybuilding</h2>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm opacity-90">Total Volume</p>
+                                <p class="text-3xl font-bold" id="evening-volume">0</p>
+                                <p class="text-xs opacity-75">kg × reps</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-90">Completion</p>
+                                <p class="text-3xl font-bold" id="evening-completion">0%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK STATS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="metric-card">
+                        <div class="metric-value" id="total-exercises">0</div>
+                        <div class="metric-label">Exercises Today</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="active-goals">0</div>
+                        <div class="metric-label">Active Goals</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="weekly-volume">0</div>
+                        <div class="metric-label">Weekly Volume</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="recovery-status">✅</div>
+                        <div class="metric-label">Recovery Status</div>
+                    </div>
+                </div>
+
+                <!-- AI INSIGHTS -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🤖 AI Insights</h2>
+                    <div id="ai-insights-container">
+                        <p class="text-gray-500">Insights will appear as you log workouts...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MORNING TAB -->
+            <div id="tab-morning" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Add Morning Exercise</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="input-group">
+                            <label>Exercise Name</label>
+                            <select id="morning-exercise-select">
+                                <option value="">Select exercise...</option>
+                                <option value="10m Running">10m Running</option>
+                                <option value="Pull-ups">Pull-ups</option>
+                                <option value="Dips">Dips</option>
+                                <option value="Push-ups">Push-ups</option>
+                                <option value="Sit-ups">Sit-ups</option>
+                                <option value="Squats">Squats</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Target Reps</label>
+                            <input type="number" id="morning-target-reps" placeholder="e.g., 100" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Actual Reps</label>
+                            <input type="number" id="morning-actual-reps" placeholder="e.g., 85" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Status</label>
+                            <select id="morning-status">
+                                <option value="completed">✅ Completed</option>
+                                <option value="partial">⚠️ Partial</option>
+                                <option value="missed">❌ Missed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addMorningExercise()" class="w-full btn btn-primary">Add Exercise</button>
+                </div>
+
+                <div id="morning-exercises-list" class="space-y-3">
+                    <p class="text-gray-500 text-center py-8">No exercises logged yet</p>
+                </div>
+            </div>
+
+            <!-- EVENING TAB -->
+            <div id="tab-evening" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Add Evening Exercise</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="input-group">
+                            <label>Exercise Name</label>
+                            <input type="text" id="evening-exercise-name" placeholder="e.g., Bench Press">
+                        </div>
+                        <div class="input-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" id="evening-weight" placeholder="e.g., 80" min="0" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>Sets × Reps</label>
+                            <input type="text" id="evening-sets-reps" placeholder="e.g., 4×8">
+                        </div>
+                        <div class="input-group">
+                            <label>Actual Reps</label>
+                            <input type="number" id="evening-actual-reps" placeholder="e.g., 32" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Rest (seconds)</label>
+                            <input type="number" id="evening-rest" placeholder="e.g., 90" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Status</label>
+                            <select id="evening-status">
+                                <option value="completed">✅ Completed</option>
+                                <option value="partial">⚠️ Partial</option>
+                                <option value="missed">❌ Missed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addEveningExercise()" class="w-full btn btn-primary">Add Exercise</button>
+                </div>
+
+                <div id="evening-exercises-list" class="space-y-3">
+                    <p class="text-gray-500 text-center py-8">No exercises logged yet</p>
+                </div>
+            </div>
+
+            <!-- GOALS TAB -->
+            <div id="tab-goals" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🎯 Create Performance Goal</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="input-group">
+                            <label>Goal Title</label>
+                            <input type="text" id="goal-title" placeholder="e.g., 100 Strict Pull-ups">
+                        </div>
+                        <div class="input-group">
+                            <label>Goal Type</label>
+                            <select id="goal-type">
+                                <option value="reps">Reps Target</option>
+                                <option value="weight">Weight Target</option>
+                                <option value="volume">Volume Target</option>
+                                <option value="bodyweight">Body Weight</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Target Value</label>
+                            <input type="number" id="goal-target" placeholder="e.g., 100" min="1" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>Target Date</label>
+                            <input type="date" id="goal-date">
+                        </div>
+                        <div class="input-group md:col-span-2">
+                            <label>Description</label>
+                            <textarea id="goal-description" placeholder="Goal details..." rows="3"></textarea>
+                        </div>
+                    </div>
+                    <button onclick="addGoal()" class="w-full btn btn-primary">Create Goal</button>
+                </div>
+
+                <div id="goals-list" class="space-y-4">
+                    <p class="text-gray-500 text-center py-8">No goals created yet</p>
+                </div>
+            </div>
+
+            <!-- ANALYTICS TAB -->
+            <div id="tab-analytics" class="tab-content hidden">
+                <div class="volume-chart-container">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Weekly Volume Trend</h2>
+                    <canvas id="volume-chart" height="80"></canvas>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🔥 Exercise Performance</h2>
+                    <div id="exercise-performance" class="space-y-3">
+                        <p class="text-gray-500">Performance data will appear here...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">📈 Recovery Metrics</h2>
+                    <div id="recovery-metrics" class="space-y-3">
+                        <p class="text-gray-500">Recovery data will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COACHING TAB -->
+            <div id="tab-coaching" class="tab-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🎯 Goal Achievement Forecast</h2>
+                    <div id="eta-container" class="space-y-4">
+                        <p class="text-gray-500">Create goals to see ETA predictions...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">💡 Personalized Recommendations</h2>
+                    <div id="recommendations-container" class="space-y-3">
+                        <p class="text-gray-500">Recommendations will appear as you log workouts...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">🔄 Sequence Optimization</h2>
+                    <div id="sequence-optimization" class="space-y-3">
+                        <p class="text-gray-500">Sequence suggestions will appear based on your performance...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Sozlamalar</h2>
+
+            <div class="space-y-4 mb-6">
+                <div class="input-group">
+                    <label>Telefon Raqami</label>
+                    <input type="tel" id="new-phone-input" placeholder="+998 XX XXX XX XX">
+                </div>
+                <button onclick="changePhone()" class="w-full btn btn-primary">Telefon O'zgartirish</button>
+            </div>
+
+            <div class="space-y-4 mb-6 border-t pt-4">
+                <div class="input-group">
+                    <label>Yangi Kod</label>
+                    <input type="password" id="new-pass-input" placeholder="4-6 raqamli kod">
+                </div>
+                <button onclick="changePassword()" class="w-full btn btn-primary">Kodni O'zgartirish</button>
+            </div>
+
+            <div class="space-y-2 mb-6 border-t pt-4">
+                <button onclick="exportData()" class="w-full btn btn-success text-sm">📥 Ma'lumotlarni Yuklab Olish</button>
+                <button onclick="clearAllData()" class="w-full btn btn-danger text-sm">🗑️ Barcha Ma'lumotlarni O'chirish</button>
+            </div>
+
+            <button onclick="closeSettings()" class="w-full btn" style="background: #d1d5db; color: #374151;">Yopish</button>
+        </div>
+    </div>
+
+    <script src="athletic-data-manager-v2.js"></script>
+    <script src="athletic-ai-engine.js"></script>
+    <script src="athletic-app.js"></script>
+</body>
+</html>

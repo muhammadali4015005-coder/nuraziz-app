@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 NURAZIZ - WORKING</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🏆</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #0a0e27; color: #fff; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { background: #0f3460; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .card { background: #16213e; border: 2px solid #0f3460; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #0a0e27; border: 2px solid #0f3460; color: #00d4ff; border-radius: 4px; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: #00d4ff; }
+        button { width: 100%; padding: 12px; background: #00d4ff; color: #0a0e27; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        button:hover { background: #00a8cc; }
+        .item { background: #0a0e27; border-left: 4px solid #00d4ff; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; background: #16213e; border: 2px solid #0f3460; color: #00d4ff; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .tab-btn.active { background: #00d4ff; color: #0a0e27; }
+        .hidden { display: none !important; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LOGIN -->
+        <div id="login-screen">
+            <div class="card" style="max-width: 400px; margin: 100px auto;">
+                <h1 style="text-align: center; margin-bottom: 20px;">🏆 NURAZIZ</h1>
+                <input type="tel" id="phone" placeholder="Telefon" oninput="formatPhone(this)">
+                <input type="password" id="pass" placeholder="Kod" onkeypress="if(event.key==='Enter') login()">
+                <button onclick="login()">KIRISH</button>
+                <button onclick="showRegister()" style="background: transparent; border: 2px solid #00d4ff; color: #00d4ff; margin-top: 10px;">YANGI AKKAUNT</button>
+                <div id="error" style="color: #ff0055; text-align: center; margin-top: 10px; display: none;"></div>
+            </div>
+
+            <div id="register-form" class="hidden">
+                <div class="card" style="max-width: 400px; margin: 100px auto;">
+                    <h1 style="text-align: center; margin-bottom: 20px;">📝 YANGI AKKAUNT</h1>
+                    <input type="tel" id="reg-phone" placeholder="Telefon" oninput="formatPhone(this)">
+                    <input type="password" id="reg-pass" placeholder="Kod (4-6)">
+                    <input type="password" id="reg-pass2" placeholder="Tasdiqlang">
+                    <button onclick="registerUser()">YARATISH</button>
+                    <button onclick="backToLogin()" style="background: transparent; border: 2px solid #00d4ff; color: #00d4ff; margin-top: 10px;">ORQAGA</button>
+                    <div id="reg-error" style="color: #ff0055; text-align: center; margin-top: 10px; display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN APP -->
+        <div id="main-screen" class="hidden">
+            <div class="header">
+                <h1>🏆 NURAZIZ</h1>
+                <p id="user-phone"></p>
+                <button onclick="logout()" style="width: auto; padding: 8px 16px; margin-top: 10px;">CHIQISH</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('schedule')">📅 KUNLIK JADVAL</button>
+                <button class="tab-btn" onclick="switchTab('morning')">🌅 ERTALAB</button>
+                <button class="tab-btn" onclick="switchTab('evening')">🌙 KECHQURUN</button>
+                <button class="tab-btn" onclick="switchTab('goals')">🎯 MAQSADLAR</button>
+                <button class="tab-btn" onclick="switchTab('insights')">🧠 AI MASLAHAT</button>
+            </div>
+
+            <!-- SCHEDULE -->
+            <div id="schedule-tab">
+                <div class="card">
+                    <h2>📅 KUNLIK JADVAL</h2>
+                    <div class="grid">
+                        <input type="time" id="schedule-time" placeholder="Vaqt">
+                        <input type="text" id="schedule-task" placeholder="Vazifa nomi">
+                    </div>
+                    <button onclick="addSchedule()">QO'SHISH</button>
+                    <div id="schedule-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- MORNING -->
+            <div id="morning-tab" class="hidden">
+                <div class="card">
+                    <h2>🌅 ERTALAB SESSIYASI</h2>
+                    <div class="grid">
+                        <input type="text" id="morning-name" placeholder="Mashq nomi">
+                        <input type="number" id="morning-target" placeholder="Maqsad" min="1">
+                    </div>
+                    <div class="grid">
+                        <input type="number" id="morning-actual" placeholder="Haqiqiy" min="0">
+                        <select id="morning-status">
+                            <option value="completed">✅ BAJARILDI</option>
+                            <option value="partial">⚠️ QISMAN</option>
+                            <option value="missed">❌ BAJARILMADI</option>
+                        </select>
+                    </div>
+                    <button onclick="addMorning()">QO'SHISH</button>
+                    <div id="morning-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- EVENING -->
+            <div id="evening-tab" class="hidden">
+                <div class="card">
+                    <h2>🌙 KECHQURUN SESSIYASI</h2>
+                    <div class="grid">
+                        <input type="text" id="evening-name" placeholder="Mashq nomi">
+                        <input type="number" id="evening-weight" placeholder="Og'irlik (kg)" min="0">
+                    </div>
+                    <div class="grid">
+                        <input type="number" id="evening-sets" placeholder="Setlar" min="1">
+                        <input type="number" id="evening-reps" placeholder="Takrorlanish" min="1">
+                    </div>
+                    <div class="grid">
+                        <input type="number" id="evening-actual" placeholder="Haqiqiy" min="0">
+                        <select id="evening-status">
+                            <option value="completed">✅ BAJARILDI</option>
+                            <option value="partial">⚠️ QISMAN</option>
+                            <option value="missed">❌ BAJARILMADI</option>
+                        </select>
+                    </div>
+                    <button onclick="addEvening()">QO'SHISH</button>
+                    <div id="evening-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- GOALS -->
+            <div id="goals-tab" class="hidden">
+                <div class="card">
+                    <h2>🎯 MAQSADLAR</h2>
+                    <div class="grid">
+                        <input type="text" id="goal-name" placeholder="Maqsad nomi">
+                        <input type="number" id="goal-target" placeholder="Maqsad" min="1">
+                    </div>
+                    <div class="grid">
+                        <input type="number" id="goal-current" placeholder="Hozir" min="0">
+                        <input type="number" id="goal-days" placeholder="Kunlar" min="1" value="30">
+                    </div>
+                    <button onclick="addGoal()">QO'SHISH</button>
+                    <div id="goals-list" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- INSIGHTS -->
+            <div id="insights-tab" class="hidden">
+                <div class="card">
+                    <h2>🧠 AI MASLAHATLAR</h2>
+                    <div id="insights-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const db = {
+            get: () => JSON.parse(localStorage.getItem('nuraziz_working') || '{}'),
+            set: (d) => localStorage.setItem('nuraziz_working', JSON.stringify(d)),
+            user: () => localStorage.getItem('nuraziz_user'),
+            setUser: (u) => localStorage.setItem('nuraziz_user', u),
+            clear: () => localStorage.removeItem('nuraziz_user')
+        };
+
+        function init() {
+            const d = db.get();
+            if (!d['+998 90 123 45 67']) {
+                d['+998 90 123 45 67'] = { pass: '1234', schedule: {}, morning: [], evening: [], goals: [] };
+                db.set(d);
+            }
+        }
+
+        function formatPhone(input) {
+            let val = input.value.replace(/\D/g, '');
+            if (val.length > 12) val = val.slice(0, 12);
+            let formatted = '';
+            if (val.length > 0) formatted = '+' + val.slice(0, 3);
+            if (val.length > 3) formatted += ' ' + val.slice(3, 5);
+            if (val.length > 5) formatted += ' ' + val.slice(5, 8);
+            if (val.length > 8) formatted += ' ' + val.slice(8, 10);
+            if (val.length > 10) formatted += ' ' + val.slice(10, 12);
+            input.value = formatted;
+        }
+
+        function login() {
+            const p = document.getElementById('phone').value.trim();
+            const pw = document.getElementById('pass').value.trim();
+            if (!p || !pw) { showError('Hammasini to\'ldiring'); return; }
+            const d = db.get();
+            if (!d[p] || d[p].pass !== pw) { showError('Noto\'g\'ri'); return; }
+            db.setUser(p);
+            show();
+        }
+
+        function showRegister() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        }
+
+        function backToLogin() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'block';
+        }
+
+        function registerUser() {
+            const p = document.getElementById('reg-phone').value.trim();
+            const pw = document.getElementById('reg-pass').value.trim();
+            const pw2 = document.getElementById('reg-pass2').value.trim();
+            
+            if (!p || !pw || !pw2) { regErr('Hammasini to\'ldiring'); return; }
+            if (pw.length < 4 || pw.length > 6) { regErr('Kod 4-6 raqam bo\'lishi kerak'); return; }
+            if (pw !== pw2) { regErr('Kodlar mos emas'); return; }
+            
+            const d = db.get();
+            if (d[p]) { regErr('Bu telefon allaqachon ro\'yxatdan o\'tgan'); return; }
+            
+            d[p] = { pass: pw, schedule: {}, morning: [], evening: [], goals: [] };
+            db.set(d);
+            alert('✅ Akkaunt yaratildi!');
+            backToLogin();
+        }
+
+        function regErr(m) {
+            document.getElementById('reg-error').innerText = m;
+            document.getElementById('reg-error').style.display = 'block';
+            setTimeout(() => document.getElementById('reg-error').style.display = 'none', 3000);
+        }
+
+        function showError(m) {
+            document.getElementById('error').innerText = m;
+            document.getElementById('error').style.display = 'block';
+            setTimeout(() => document.getElementById('error').style.display = 'none', 3000);
+        }
+
+        function logout() {
+            if (confirm('Chiqish?')) { db.clear(); location.reload(); }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('[id$="-tab"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tab + '-tab').classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function addSchedule() {
+            const time = document.getElementById('schedule-time').value;
+            const task = document.getElementById('schedule-task').value.trim();
+            if (!time || !task) { alert('Hammasini to\'ldiring'); return; }
+            
+            const u = db.user();
+            const d = db.get();
+            if (!d[u]) d[u] = { pass: '1234', schedule: {}, morning: [], evening: [], goals: [] };
+            if (!d[u].schedule[time]) d[u].schedule[time] = [];
+            d[u].schedule[time].push({ name: task, completed: false });
+            db.set(d);
+            document.getElementById('schedule-time').value = '';
+            document.getElementById('schedule-task').value = '';
+            update();
+        }
+
+        function addMorning() {
+            const name = document.getElementById('morning-name').value.trim();
+            const target = parseInt(document.getElementById('morning-target').value) || 0;
+            const actual = parseInt(document.getElementById('morning-actual').value) || 0;
+            const status = document.getElementById('morning-status').value;
+            if (!name || !target) { alert('Hammasini to\'ldiring'); return; }
+            
+            const u = db.user();
+            const d = db.get();
+            if (!d[u]) d[u] = { pass: '1234', schedule: {}, morning: [], evening: [], goals: [] };
+            if (!d[u].morning) d[u].morning = [];
+            d[u].morning.push({ id: Date.now(), name, target, actual, status, date: new Date().toISOString().split('T')[0] });
+            db.set(d);
+            document.getElementById('morning-name').value = '';
+            document.getElementById('morning-target').value = '';
+            document.getElementById('morning-actual').value = '';
+            update();
+        }
+
+        function addEvening() {
+            const name = document.getElementById('evening-name').value.trim();
+            const weight = parseInt(document.getElementById('evening-weight').value) || 0;
+            const sets = parseInt(document.getElementById('evening-sets').value) || 0;
+            const reps = parseInt(document.getElementById('evening-reps').value) || 0;
+            const actual = parseInt(document.getElementById('evening-actual').value) || 0;
+            const status = document.getElementById('evening-status').value;
+            if (!name || !weight || !sets || !reps) { alert('Hammasini to\'ldiring'); return; }
+            
+            const u = db.user();
+            const d = db.get();
+            if (!d[u]) d[u] = { pass: '1234', schedule: {}, morning: [], evening: [], goals: [] };
+            if (!d[u].evening) d[u].evening = [];
+            d[u].evening.push({ id: Date.now(), name, weight, sets, reps, actual, status, date: new Date().toISOString().split('T')[0] });
+            db.set(d);
+            document.getElementById('evening-name').value = '';
+            document.getElementById('evening-weight').value = '';
+            document.getElementById('evening-sets').value = '';
+            document.getElementById('evening-reps').value = '';
+            document.getElementById('evening-actual').value = '';
+            update();
+        }
+
+        function addGoal() {
+            const name = document.getElementById('goal-name').value.trim();
+            const target = parseInt(document.getElementById('goal-target').value) || 0;
+            const current = parseInt(document.getElementById('goal-current').value) || 0;
+            const days = parseInt(document.getElementById('goal-days').value) || 30;
+            if (!name || !target) { alert('Hammasini to\'ldiring'); return; }
+            
+            const u = db.user();
+            const d = db.get();
+            if (!d[u]) d[u] = { pass: '1234', schedule: {}, morning: [], evening: [], goals: [] };
+            if (!d[u].goals) d[u].goals = [];
+            d[u].goals.push({ id: Date.now(), name, target, current, days });
+            db.set(d);
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
+            document.getElementById('goal-current').value = '';
+            document.getElementById('goal-days').value = '30';
+            update();
+        }
+
+        function deleteItem(type, id) {
+            const u = db.user();
+            const d = db.get();
+            if (type === 'morning') d[u].morning = d[u].morning.filter(x => x.id !== id);
+            else if (type === 'evening') d[u].evening = d[u].evening.filter(x => x.id !== id);
+            else if (type === 'goal') d[u].goals = d[u].goals.filter(x => x.id !== id);
+            db.set(d);
+            update();
+        }
+
+        function update() {
+            const u = db.user();
+            const d = db.get();
+            if (!d[u]) d[u] = { pass: '1234', schedule: {}, morning: [], evening: [], goals: [] };
+            
+            const today = new Date().toISOString().split('T')[0];
+
+            // Schedule
+            const times = Object.keys(d[u].schedule || {}).sort();
+            document.getElementById('schedule-list').innerHTML = times.map(time => {
+                const tasks = d[u].schedule[time] || [];
+                return tasks.map((t, i) => `<div class="item"><span>${time} - ${t.name}</span><span style="cursor: pointer;" onclick="toggleSchedule('${time}', ${i})">${t.completed ? '✅' : '⏳'}</span></div>`).join('');
+            }).join('');
+
+            // Morning
+            const morning = d[u].morning.filter(x => x.date === today);
+            document.getElementById('morning-list').innerHTML = morning.length > 0 ? morning.map(m => `<div class="item"><span>${m.name}: ${m.actual}/${m.target} (${m.status})</span><button onclick="deleteItem('morning', ${m.id})" style="width: auto; padding: 5px 10px;">🗑️</button></div>`).join('') : '<div style="color: #aaa;">Mashqlar yo\'q</div>';
+
+            // Evening
+            const evening = d[u].evening.filter(x => x.date === today);
+            document.getElementById('evening-list').innerHTML = evening.length > 0 ? evening.map(e => `<div class="item"><span>${e.name}: ${e.weight}kg ${e.sets}x${e.reps} (${e.status})</span><button onclick="deleteItem('evening', ${e.id})" style="width: auto; padding: 5px 10px;">🗑️</button></div>`).join('') : '<div style="color: #aaa;">Mashqlar yo\'q</div>';
+
+            // Goals
+            const goals = d[u].goals || [];
+            document.getElementById('goals-list').innerHTML = goals.length > 0 ? goals.map(g => {
+                const progress = Math.round((g.current / g.target) * 100);
+                return `<div class="item"><span>${g.name}: ${g.current}/${g.target} (${progress}%) - ${g.days} kun</span><button onclick="deleteItem('goal', ${g.id})" style="width: auto; padding: 5px 10px;">🗑️</button></div>`;
+            }).join('') : '<div style="color: #aaa;">Maqsadlar yo\'q</div>';
+
+            // Insights
+            const insights = [];
+            if (morning.length === 0) insights.push('🌅 Ertalab mashqlarini qo\'shing');
+            if (evening.length === 0) insights.push('🌙 Kechqurun mashqlarini qo\'shing');
+            if (goals.length === 0) insights.push('🎯 Maqsadlar qo\'shing');
+            goals.forEach(g => {
+                const progress = (g.current / g.target) * 100;
+                if (progress >= 100) insights.push(`🔥 "${g.name}" maqsadi tugatildi!`);
+                else if (progress >= 80) insights.push(`💪 "${g.name}" 80% tugatildi`);
+            });
+            insights.push('📌 Har kuni muntazam mashq qiling');
+            insights.push('💤 7-8 soat uyqu olish kerak');
+            insights.push('🥗 Oqil ovqatlanish - maqsadga erishishning kaliti');
+            document.getElementById('insights-list').innerHTML = insights.map(i => `<div class="item"><span>${i}</span></div>`).join('');
+        }
+
+        function toggleSchedule(time, index) {
+            const u = db.user();
+            const d = db.get();
+            if (d[u].schedule[time]) {
+                d[u].schedule[time][index].completed = !d[u].schedule[time][index].completed;
+                db.set(d);
+                update();
+            }
+        }
+
+        function show() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('user-phone').innerText = db.user();
+            update();
+        }
+
+        init();
+        if (db.user()) show();
+    </script>
+</body>
+</html>

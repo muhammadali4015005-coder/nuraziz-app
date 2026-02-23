@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kun Tartibi - Habit Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            stroke-dasharray: 339.292;
+            stroke-dashoffset: 0;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .habit-item {
+            transition: all 0.2s ease;
+        }
+
+        .habit-item:hover {
+            transform: translateX(4px);
+        }
+
+        .status-pending {
+            background: #f3f4f6;
+        }
+
+        .status-done {
+            background: #d1fae5;
+        }
+
+        .status-fail {
+            background: #fee2e2;
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm fade-in">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">📋</div>
+                <h1 class="text-3xl font-bold text-gray-800">Kun Tartibi</h1>
+                <p class="text-gray-500 mt-2">Har kuni o'zingizni rivojlantiring</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maxfiy Kod</label>
+                    <input 
+                        type="password" 
+                        id="pass-input" 
+                        placeholder="Masalan: 1234" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition"
+                        onkeypress="if(event.key==='Enter') checkPass()"
+                    >
+                </div>
+                <button 
+                    onclick="checkPass()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+                >
+                    Kirish
+                </button>
+                <p id="error-msg" class="text-red-500 text-sm text-center hidden">❌ Kod noto'g'ri!</p>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">Demo kod: <span class="font-mono font-bold">1234</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden min-h-screen pb-20">
+        <div class="max-w-2xl mx-auto px-4 py-6">
+            <!-- HEADER -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 fade-in">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Bugungi Progress</h1>
+                        <p class="text-gray-500 text-sm mt-1" id="date-display"></p>
+                    </div>
+                    <button onclick="openSettings()" class="text-gray-600 hover:text-gray-800 text-2xl">⚙️</button>
+                </div>
+
+                <!-- PROGRESS CIRCLE -->
+                <div class="flex justify-center mb-6">
+                    <svg width="150" height="150" class="progress-ring">
+                        <circle
+                            class="progress-ring-circle"
+                            stroke="#e5e7eb"
+                            fill="transparent"
+                            stroke-width="8"
+                            r="54"
+                            cx="75"
+                            cy="75"
+                        />
+                        <circle
+                            id="progress-circle-stroke"
+                            class="progress-ring-circle"
+                            stroke="#3b82f6"
+                            fill="transparent"
+                            stroke-width="8"
+                            r="54"
+                            cx="75"
+                            cy="75"
+                        />
+                        <text x="75" y="85" text-anchor="middle" class="text-2xl font-bold" id="progress-percent">0%</text>
+                    </svg>
+                </div>
+
+                <p class="text-center text-gray-600 font-medium" id="stat-text">Vazifalar qo'shing</p>
+            </div>
+
+            <!-- ADD HABIT FORM -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 fade-in">
+                <div class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="habit-input" 
+                        placeholder="Yangi vazifa qo'shing..." 
+                        class="flex-1 p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition"
+                        onkeypress="if(event.key==='Enter') addHabit()"
+                    >
+                    <button 
+                        onclick="addHabit()" 
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg transition"
+                    >
+                        ➕
+                    </button>
+                </div>
+            </div>
+
+            <!-- HABITS LIST -->
+            <div id="habit-list" class="space-y-3 mb-6">
+                <div class="text-center text-gray-400 py-8">
+                    <p class="text-lg">📝 Hali vazifa yo'q</p>
+                </div>
+            </div>
+
+            <!-- STATISTICS -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 fade-in">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">📊 Statistika</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center p-3 bg-blue-50 rounded-lg">
+                        <p class="text-2xl font-bold text-blue-600" id="total-habits">0</p>
+                        <p class="text-xs text-gray-600">Jami vazifa</p>
+                    </div>
+                    <div class="text-center p-3 bg-green-50 rounded-lg">
+                        <p class="text-2xl font-bold text-green-600" id="completed-habits">0</p>
+                        <p class="text-xs text-gray-600">Bajarildi</p>
+                    </div>
+                    <div class="text-center p-3 bg-red-50 rounded-lg">
+                        <p class="text-2xl font-bold text-red-600" id="failed-habits">0</p>
+                        <p class="text-xs text-gray-600">Bajarilmadi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Sozlamalar</h2>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Yangi Kod O'rnatish</label>
+                    <input 
+                        type="password" 
+                        id="new-pass-input" 
+                        placeholder="Yangi kod" 
+                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition"
+                    >
+                </div>
+                <button 
+                    onclick="changePassword()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition"
+                >
+                    Kodni O'zgartirish
+                </button>
+            </div>
+
+            <div class="space-y-2 mb-6 border-t pt-4">
+                <button 
+                    onclick="exportData()" 
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition text-sm"
+                >
+                    📥 Ma'lumotlarni Yuklab Olish
+                </button>
+                <button 
+                    onclick="clearAllData()" 
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition text-sm"
+                >
+                    🗑️ Barcha Ma'lumotlarni O'chirish
+                </button>
+            </div>
+
+            <button 
+                onclick="closeSettings()" 
+                class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 rounded-lg transition"
+            >
+                Yopish
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONSTANTS & STATE ============
+        const STORAGE_KEY = 'habitTrackerData';
+        const PASS_KEY = 'habitTrackerPass';
+        let habits = [];
+        let currentPass = localStorage.getItem(PASS_KEY) || '1234';
+
+        // ============ INITIALIZATION ============
+        function init() {
+            loadHabits();
+            updateDateDisplay();
+            renderHabits();
+        }
+
+        function updateDateDisplay() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = today.toLocaleDateString('uz-UZ', options);
+            document.getElementById('date-display').innerText = dateStr;
+        }
+
+        // ============ AUTHENTICATION ============
+        function checkPass() {
+            const input = document.getElementById('pass-input').value;
+            if (input === currentPass) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-screen').classList.remove('hidden');
+                document.getElementById('pass-input').value = '';
+                init();
+            } else {
+                const errorMsg = document.getElementById('error-msg');
+                errorMsg.classList.remove('hidden');
+                setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+            }
+        }
+
+        // ============ SETTINGS ============
+        function openSettings() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
+            document.getElementById('new-pass-input').value = '';
+        }
+
+        function changePassword() {
+            const newPass = document.getElementById('new-pass-input').value;
+            if (newPass.trim().length < 4) {
+                alert('Kod kamida 4 ta belgidan iborat bo\'lishi kerak!');
+                return;
+            }
+            currentPass = newPass;
+            localStorage.setItem(PASS_KEY, currentPass);
+            alert('✅ Kod muvaffaqiyatli o\'zgartirildi!');
+            closeSettings();
+        }
+
+        function exportData() {
+            const data = {
+                habits: habits,
+                exportDate: new Date().toLocaleString('uz-UZ')
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `habits-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ Barcha ma\'lumotlar o\'chiriladi! Davom etmoqchimisiz?')) {
+                habits = [];
+                localStorage.removeItem(STORAGE_KEY);
+                renderHabits();
+                alert('✅ Barcha ma\'lumotlar o\'chirildi!');
+            }
+        }
+
+        // ============ HABIT MANAGEMENT ============
+        function addHabit() {
+            const input = document.getElementById('habit-input');
+            if (input.value.trim() === '') {
+                alert('Vazifa nomini kiriting!');
+                return;
+            }
+
+            const newHabit = {
+                id: Date.now(),
+                text: input.value.trim(),
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            habits.push(newHabit);
+            input.value = '';
+            saveHabits();
+            renderHabits();
+        }
+
+        function toggleStatus(id, newStatus) {
+            habits = habits.map(h => 
+                h.id === id ? { ...h, status: newStatus } : h
+            );
+            saveHabits();
+            renderHabits();
+        }
+
+        function deleteHabit(id) {
+            if (confirm('Vazifani o\'chirmoqchimisiz?')) {
+                habits = habits.filter(h => h.id !== id);
+                saveHabits();
+                renderHabits();
+            }
+        }
+
+        // ============ RENDERING ============
+        function renderHabits() {
+            const list = document.getElementById('habit-list');
+            
+            if (habits.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 py-8"><p class="text-lg">📝 Hali vazifa yo\'q</p></div>';
+                updateStats();
+                return;
+            }
+
+            list.innerHTML = habits.map(h => `
+                <div class="habit-item bg-white rounded-xl shadow p-4 flex items-center justify-between ${getStatusClass(h.status)}">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 ${h.status === 'done' ? 'line-through text-gray-400' : ''}">${h.text}</p>
+                        <p class="text-xs text-gray-500 mt-1">${getStatusText(h.status)}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button 
+                            onclick="toggleStatus(${h.id}, 'done')" 
+                            class="p-2 hover:bg-green-100 rounded-lg transition ${h.status === 'done' ? 'bg-green-200' : ''}"
+                            title="Bajarildi"
+                        >
+                            ✅
+                        </button>
+                        <button 
+                            onclick="toggleStatus(${h.id}, 'fail')" 
+                            class="p-2 hover:bg-red-100 rounded-lg transition ${h.status === 'fail' ? 'bg-red-200' : ''}"
+                            title="Bajarilmadi"
+                        >
+                            ❌
+                        </button>
+                        <button 
+                            onclick="deleteHabit(${h.id})" 
+                            class="p-2 hover:bg-gray-200 rounded-lg transition"
+                            title="O'chirish"
+                        >
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateStats();
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'pending': 'status-pending',
+                'done': 'status-done',
+                'fail': 'status-fail'
+            };
+            return classes[status] || 'status-pending';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'pending': '⏳ Kutilmoqda',
+                'done': '✅ Bajarildi',
+                'fail': '❌ Bajarilmadi'
+            };
+            return texts[status] || 'Noma\'lum';
+        }
+
+        // ============ STATISTICS ============
+        function updateStats() {
+            const total = habits.length;
+            const completed = habits.filter(h => h.status === 'done').length;
+            const failed = habits.filter(h => h.status === 'fail').length;
+            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            // Update percentage display
+            document.getElementById('progress-percent').innerText = percentage + '%';
+            
+            // Update progress circle color
+            const circle = document.getElementById('progress-circle-stroke');
+            let color = '#ef4444'; // Red
+            if (percentage >= 80) color = '#10b981'; // Green
+            else if (percentage >= 50) color = '#f59e0b'; // Yellow
+            circle.setAttribute('stroke', color);
+
+            // Update progress circle animation
+            const circumference = 2 * Math.PI * 54;
+            const offset = circumference - (percentage / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+
+            // Update stat text
+            document.getElementById('stat-text').innerText = 
+                total === 0 ? 'Vazifalar qo\'shing' : `${completed}/${total} bajarildi`;
+
+            // Update statistics cards
+            document.getElementById('total-habits').innerText = total;
+            document.getElementById('completed-habits').innerText = completed;
+            document.getElementById('failed-habits').innerText = failed;
+        }
+
+        // ============ STORAGE ============
+        function saveHabits() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(habits));
+        }
+
+        function loadHabits() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            habits = stored ? JSON.parse(stored) : [];
+        }
+
+        // ============ START APP ============
+        window.addEventListener('load', () => {
+            updateDateDisplay();
+        });
+    </script>
+</body>
+</html>

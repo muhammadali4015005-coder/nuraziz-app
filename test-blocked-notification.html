@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Blocked Notification</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #0a0e27;
+        }
+
+        .test-btn {
+            background: #ff0055;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .test-btn:hover {
+            background: #cc0044;
+        }
+
+        /* BLOCKED NOTIFICATION */
+        .blocked-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff0055 0%, #cc0044 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .blocked-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 48px 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .blocked-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .blocked-title {
+            color: #ff0055;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 0 24px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .blocked-text {
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            line-height: 1.5;
+        }
+
+        .blocked-phone {
+            color: #666;
+            font-size: 16px;
+            margin: 0 0 16px 0;
+        }
+
+        .blocked-number {
+            color: #ff0055;
+            font-size: 28px;
+            font-weight: bold;
+            background: rgba(255, 0, 85, 0.1);
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 3px solid #ff0055;
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: white;">BLOCKED NOTIFICATION TEST</h1>
+    <button class="test-btn" onclick="showNotification()">NOTIFICATION NI KO'RSATISH</button>
+
+    <div id="notification" class="blocked-overlay hidden">
+        <div class="blocked-box">
+            <div class="blocked-icon">⚠️</div>
+            <h2 class="blocked-title">OBUNA TUGADI</h2>
+            <p class="blocked-text">
+                Sizning oylik tolovingizning muddati tugagan!
+            </p>
+            <p class="blocked-phone">
+                Iltimos quyidagi raqamga telefon qiling:
+            </p>
+            <div class="blocked-number">+998 91 833 5005</div>
+        </div>
+    </div>
+
+    <script>
+        function showNotification() {
+            console.log('🔔 Showing notification...');
+            const notification = document.getElementById('notification');
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                console.log('🔔 Hiding notification...');
+                notification.classList.add('hidden');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

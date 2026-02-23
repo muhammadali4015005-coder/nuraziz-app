@@ -1,0 +1,43 @@
+{
+  "name": "vaqtni-boshqarish",
+  "version": "3.0.0",
+  "description": "Vaqtni boshqarish dasturi - Time Management Application",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "concurrently \"node server.js\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server.js",
+    "start": "node server.js",
+    "vercel-build": "vite build"
+  },
+  "keywords": [
+    "nuraziz",
+    "athletic",
+    "fitness",
+    "performance",
+    "coach",
+    "ai",
+    "workout",
+    "tracking",
+    "premium"
+  ],
+  "author": "Kiro AI",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "concurrently": "^9.2.1",
+    "terser": "^5.46.0",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.564.0",
+    "mongodb": "^5.9.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

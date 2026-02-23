@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletic Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // ULTIMATE NOTIFICATION BLOCKING
+        (function() {
+            // Intercept before anything loads
+            const blockNotifications = function() {
+                // Remove Notification class
+                delete window.Notification;
+                
+                // Block Notification property
+                Object.defineProperty(window, 'Notification', {
+                    get: () => undefined,
+                    set: () => {},
+                    configurable: false
+                });
+                
+                // Override ServiceWorkerRegistration
+                if ('ServiceWorkerRegistration' in window) {
+                    const originalShowNotification = ServiceWorkerRegistration.prototype.showNotification;
+                    if (originalShowNotification) {
+                        ServiceWorkerRegistration.prototype.showNotification = function() {
+                            return Promise.reject('Notifications disabled');
+                        };
+                    }
+                }
+                
+                // Block permission.query
+                if (navigator.permissions && navigator.permissions.query) {
+                    const originalQuery = navigator.permissions.query;
+                    navigator.permissions.query = function(params) {
+                        if (params && params.name === 'notifications') {
+                            return Promise.resolve({ state: Notification ? 'denied' : 'denied' });
+                        }
+                        return originalQuery.call(navigator.permissions, params);
+                    };
+                }
+                
+                // Block PushManager
+                if ('PushManager' in window) {
+                    Object.defineProperty(window.PushManager.prototype, 'subscribe', {
+                        value: function() {
+                            return Promise.reject('Push disabled');
+                        }
+                    });
+                }
+                
+                // Unregister service workers
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(
+                        registrations => {
+                            registrations.forEach(reg => reg.unregister());
+                        }
+                    );
+                }
+                
+                // Block all browser dialogs
+                window.alert = function() {};
+                window.confirm = function() { return false; };
+                window.prompt = function() { return null; };
+                
+                // Block fetch to notification endpoints
+                const originalFetch = window.fetch;
+                window.fetch = function(resource, init) {
+                    if (typeof resource === 'string' && 
+                        (resource.includes('notification') || 
+                         resource.includes('push') || 
+                         resource.includes('Notification'))) {
+                        return Promise.reject('Notifications blocked');
+                    }
+                    return originalFetch(resource, init);
+                };
+            };
+            
+            // Run immediately
+            blockNotifications();
+            
+            // Also run on DOMContentLoaded
+            document.addEventListener('DOMContentLoaded', blockNotifications);
+            
+            // And on load
+            window.addEventListener('load', blockNotifications);
+        })();
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Custom Alert */
+        #alertOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #alertOverlay.show {
+            display: flex;
+        }
+        
+        #alertBox {
+            background: #007BFF;
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+            text-align: center;
+            min-width: 300px;
+            animation: scaleIn 0.3s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        #alertBox h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        #alertBox button {
+            background: white;
+            color: #007BFF;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        #alertBox button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Alert -->
+    <div id="alertOverlay">
+        <div id="alertBox">
+            <h2>✓ Saqlandi</h2>
+            <button onclick="closeAlert()">Yopish</button>
+        </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm fade-in">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">💪</div>
+                <h1 class="text-3xl font-bold text-gray-800">Athletic Coach</h1>
+            </div>
+
+            <div class="space-y-4">
+                <input type="tel" id="phone" placeholder="Telefon: +998 90 123 45 67" class="w-full p-3 border-2 border-gray-300 rounded-lg">
+                <input type="password" id="pass" placeholder="Kod: 1234" class="w-full p-3 border-2 border-gray-300 rounded-lg" onkeypress="if(event.key==='Enter') login()">
+                <button onclick="login()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">Kirish</button>
+                <p id="err" class="text-red-500 text-sm text-center hidden"></p>
+                <button onclick="reg()" class="w-full bg-gray-200 text-gray-800 font-bold py-2 rounded-lg">Yangi Akkaunt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="hidden min-h-screen pb-20">
+        <div class="max-w-2xl mx-auto px-4 py-6">
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">💪 Athletic Coach</h1>
+                    <p class="text-gray-600 text-xs mt-1">📱 <span id="user"></span></p>
+                </div>
+                <button onclick="logout()" class="text-red-600 text-2xl">🚪</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-pink-400 to-red-500 text-white rounded-xl p-4">
+                    <p class="text-sm">Morning Volume</p>
+                    <p class="text-3xl font-bold" id="mv">0</p>
+                </div>
+                <div class="bg-gradient-to-br from-blue-400 to-cyan-500 text-white rounded-xl p-4">
+                    <p class="text-sm">Evening Volume</p>
+                    <p class="text-3xl font-bold" id="ev">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Add Exercise</h2>
+                <div class="space-y-3 mb-4">
+                    <input type="text" id="name" placeholder="Exercise name" class="w-full p-3 border-2 border-gray-300 rounded-lg">
+                    <input type="number" id="target" placeholder="Target reps" class="w-full p-3 border-2 border-gray-300 rounded-lg" min="1">
+                    <input type="number" id="actual" placeholder="Actual reps" class="w-full p-3 border-2 border-gray-300 rounded-lg" min="0">
+                    <select id="status" class="w-full p-3 border-2 border-gray-300 rounded-lg">
+                        <option value="completed">✅ Completed</option>
+                        <option value="partial">⚠️ Partial</option>
+                        <option value="missed">❌ Missed</option>
+                    </select>
+                </div>
+                <button onclick="add()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">Add Exercise</button>
+            </div>
+
+            <div id="list" class="space-y-3">
+                <p class="text-gray-500 text-center py-8">No exercises</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom Alert Function
+        function showAlert() {
+            document.getElementById('alertOverlay').classList.add('show');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertOverlay').classList.remove('show');
+        }
+
+        const db = {
+            get: () => JSON.parse(localStorage.getItem('ac') || '{}'),
+            set: (d) => localStorage.setItem('ac', JSON.stringify(d)),
+            user: () => localStorage.getItem('cu'),
+            setUser: (u) => localStorage.setItem('cu', u)
+        };
+
+        function login() {
+            const p = document.getElementById('phone').value.trim();
+            const pw = document.getElementById('pass').value.trim();
+            if (!p || !pw) { err('Fill all fields'); return; }
+            
+            const d = db.get();
+            if (!d[p] || d[p].pass !== pw) { err('Wrong credentials'); return; }
+            
+            db.setUser(p);
+            show();
+        }
+
+        function reg() {
+            const p = prompt('Phone:');
+            if (!p) return;
+            const pw = prompt('Code (4-6):');
+            if (!pw || pw.length < 4 || pw.length > 6) { alert('Code 4-6 digits'); return; }
+            const pw2 = prompt('Confirm:');
+            if (pw !== pw2) { alert('Codes dont match'); return; }
+            
+            const d = db.get();
+            if (d[p]) { alert('Already registered'); return; }
+            d[p] = { pass: pw, ex: [] };
+            db.set(d);
+            alert('Account created!');
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                localStorage.removeItem('cu');
+                location.reload();
+            }
+        }
+
+        function add() {
+            const n = document.getElementById('name').value.trim();
+            const t = document.getElementById('target').value;
+            const a = document.getElementById('actual').value;
+            const s = document.getElementById('status').value;
+            
+            if (!n || !t || !a) { return; }
+            
+            const u = db.user();
+            const d = db.get();
+            d[u].ex.push({ id: Date.now(), name: n, target: parseInt(t), actual: parseInt(a), status: s, date: new Date().toISOString().split('T')[0] });
+            db.set(d);
+            
+            document.getElementById('name').value = '';
+            document.getElementById('target').value = '';
+            document.getElementById('actual').value = '';
+            update();
+            showAlert();
+        }
+
+        function del(id) {
+            if (confirm('Delete?')) {
+                const u = db.user();
+                const d = db.get();
+                d[u].ex = d[u].ex.filter(e => e.id !== id);
+                db.set(d);
+                update();
+            }
+        }
+
+        function update() {
+            const u = db.user();
+            const d = db.get();
+            const today = new Date().toISOString().split('T')[0];
+            const ex = d[u].ex.filter(e => e.date === today);
+            
+            const mv = ex.reduce((s, e) => s + e.actual, 0);
+            document.getElementById('mv').innerText = mv;
+            document.getElementById('ev').innerText = '0';
+            
+            const list = document.getElementById('list');
+            if (ex.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-8">No exercises</p>';
+                return;
+            }
+            
+            list.innerHTML = ex.map(e => `
+                <div class="bg-white rounded-xl shadow p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-gray-800">${e.name}</h3>
+                            <p class="text-sm text-gray-600">${e.actual}/${e.target} reps</p>
+                        </div>
+                        <span class="text-xs font-bold px-2 py-1 rounded-full ${e.status === 'completed' ? 'bg-green-200 text-green-800' : e.status === 'partial' ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800'}">${e.status.toUpperCase()}</span>
+                    </div>
+                    <button onclick="del(${e.id})" class="text-red-500 text-sm mt-2">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function show() {
+            const u = db.user();
+            if (!u) return;
+            
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('user').innerText = u;
+            update();
+        }
+
+        function err(m) {
+            const e = document.getElementById('err');
+            e.innerText = m;
+            e.classList.remove('hidden');
+            setTimeout(() => e.classList.add('hidden'), 3000);
+        }
+
+        // Init
+        if (!db.get()['+998 90 123 45 67']) {
+            const d = db.get();
+            d['+998 90 123 45 67'] = { pass: '1234', ex: [] };
+            db.set(d);
+        }
+
+        if (db.user()) show();
+    </script>
+</body>
+</html>

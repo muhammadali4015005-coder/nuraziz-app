@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NURAZIZ - To'liq Versiya</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* CARDS */
+        .card {
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        /* INPUTS */
+        .input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #0a0e27;
+            border: 2px solid #0f3460;
+            color: #00d4ff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+        
+        /* BUTTONS */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            color: #0a0e27;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-sec {
+            background: transparent;
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+        }
+        
+        .btn-sec:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+        
+        /* ITEMS */
+        .item {
+            background: #0a0e27;
+            border-left: 4px solid #00d4ff;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .item:hover {
+            transform: translateX(4px);
+            border-left-width: 6px;
+        }
+        
+        .item.completed {
+            border-left-color: #00ff88;
+            opacity: 0.7;
+        }
+        
+        .item.partial {
+            border-left-color: #ffaa00;
+        }
+        
+        /* TABS */
+        .tab-btn {
+            padding: 12px 20px;
+            background: #16213e;
+            border: 2px solid #0f3460;
+            color: #00d4ff;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: #0f3460;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            color: #0a0e27;
+            border-color: #00d4ff;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #0f3460 0%, #00d4ff 100%);
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: -320px;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: #16213e;
+            border-right: 2px solid #0f3460;
+            padding: 24px;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+        
+        .overlay.show {
+            display: block;
+        }
+        
+        /* BURGER MENU */
+        .burger {
+            background: #00d4ff;
+            color: #0a0e27;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .burger:hover {
+            transform: scale(1.1);
+        }
+        
+        /* UTILITY */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* GRID LAYOUTS */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        /* PROGRESS BAR */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #0a0e27;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff 0%, #00ff88 100%);
+            transition: width 0.3s;
+        }
+        
+        /* STATS CARDS */
+        .stat-card {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #0f3460;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* MODAL */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);">
+            <div class="card" style="max-width: 450px; width: 90%;">
+                <!-- LOGIN FORM -->
+                <div id="login-form">
+                    <h1 style="text-align: center; margin-bottom: 40px; color: #00d4ff; font-size: 48px; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);">NURAZIZ</h1>
+                    <p style="text-align: center; color: #aaa; margin-bottom: 30px;">To'liq Versiya - MongoDB Integratsiya</p>
+                    
+                    <input type="text" id="phone" placeholder="Telefon raqam (+998 XX XXX XX XX)" class="input" autocomplete="off" inputmode="numeric">
+                    <input type="password" id="pass" placeholder="Parol (4-6 raqam)" class="input" autocomplete="off">
+                    
+                    <button onclick="login()" class="btn">KIRISH</button>
+                    <button onclick="showRegister()" class="btn btn-sec">YANGI AKKAUNT YARATISH</button>
+                    
+                    <div style="margin-top: 20px; padding: 16px; background: #0a0e27; border-radius: 8px; border-left: 4px solid #00d4ff;">
+                        <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Demo akkaunt:</p>
+                        <p style="font-size: 14px; color: #00d4ff;">📱 +998 90 123 45 67</p>
+                        <p style="font-size: 14px; color: #00d4ff;">🔑 1234</p>
+                    </div>
+                </div>
+                
+                <!-- REGISTER FORM -->
+                <div id="register-form" class="hidden">
+                    <h2 style="text-align: center; margin-bottom: 30px; color: #00d4ff;">YANGI AKKAUNT</h2>
+                    
+                    <input type="text" id="reg-name" placeholder="Ismingiz" class="input" autocomplete="off">
+                    <input type="text" id="reg-phone" placeholder="Telefon raqam (+998 XX XXX XX XX)" class="input" autocomplete="off" inputmode="numeric">
+                    <input type="password" id="reg-pass" placeholder="Parol (4-6 raqam)" class="input" autocomplete="off">
+                    <input type="password" id="reg-pass2" placeholder="Parolni tasdiqlang" class="input" autocomplete="off">
+                    
+                    <button onclick="registerUser()" class="btn">AKKAUNT YARATISH</button>
+                    <button onclick="backToLogin()" class="btn btn-sec">ORQAGA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="hidden">
+        <!-- HEADER -->
+        <div class="header">
+            <button class="burger" onclick="toggleSidebar()">☰</button>
+            <h1>NURAZIZ</h1>
+            <button onclick="logout()" style="background: #ff0055; color: #fff; border: none; cursor: pointer; font-weight: bold; padding: 12px 18px; border-radius: 8px; transition: all 0.3s;">CHIQISH</button>
+        </div>
+
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+        
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <button onclick="closeSidebar()" style="width: 100%; background: #ff0055; color: #fff; border: none; padding: 12px; border-radius: 8px; margin-bottom: 24px; cursor: pointer; font-weight: bold; font-size: 16px;">✕ YOPISH</button>
+            
+            <div style="padding: 16px; background: #0a0e27; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #00d4ff;">
+                <p style="font-size: 12px; color: #aaa; margin-bottom: 4px;">Foydalanuvchi:</p>
+                <p style="font-size: 16px; color: #00d4ff; font-weight: bold;" id="user-phone"></p>
+                <p style="font-size: 14px; color: #fff; margin-top: 8px;" id="user-name"></p>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <p style="font-size: 12px; color: #aaa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Asosiy Bo'limlar</p>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('schedule'); closeSidebar();">📅 KUNLIK JADVAL</button>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('morning'); closeSidebar();">🌅 ERTALAB MASHQLARI</button>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('evening'); closeSidebar();">🌙 KECHQURUN MASHQLARI</button>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('goals'); closeSidebar();">🎯 MAQSADLAR</button>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('nutrition'); closeSidebar();">🍎 OVQATLANISH</button>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #0f3460; margin: 20px 0;">
+            
+            <div style="margin-bottom: 16px;">
+                <p style="font-size: 12px; color: #aaa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Tahlil va Hisobotlar</p>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('insights'); closeSidebar();">🤖 AI MASLAHATLAR</button>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('weekly'); closeSidebar();">📊 HAFTALIK NATIJALAR</button>
+                <button class="tab-btn" style="width: 100%; text-align: left; margin-bottom: 8px;" onclick="switchTab('stats'); closeSidebar();">📈 STATISTIKA</button>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #0f3460; margin: 20px 0;">
+            
+            <button class="tab-btn" style="width: 100%; text-align: left; background: #ff0055; border-color: #ff0055; color: #fff;" onclick="switchTab('admin'); closeSidebar();">⚙️ ADMIN PANEL</button>
+        </div>
+
+        <!-- MAIN CONTAINER -->
+        <div class="container">
+            <!-- TAB BUTTONS (Desktop) -->
+            <div style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+                <button class="tab-btn active" onclick="switchTab('schedule')">📅 JADVAL</button>
+                <button class="tab-btn" onclick="switchTab('morning')">🌅 ERTALAB</button>
+                <button class="tab-btn" onclick="switchTab('evening')">🌙 KECHQURUN</button>
+                <button class="tab-btn" onclick="switchTab('goals')">🎯 MAQSADLAR</button>
+                <button class="tab-btn" onclick="switchTab('nutrition')">🍎 OVQAT</button>
+                <button class="tab-btn" onclick="switchTab('insights')">🤖 AI</button>
+            </div>
+
+            <!-- SCHEDULE TAB -->
+            <div id="schedule-tab">
+                <div class="card">
+                    <h2>📅 KUNLIK JADVAL</h2>
+                    
+                    <div class="grid-2" style="margin-bottom: 16px;">
+                        <input type="time" id="schedule-time" class="input">
+                        <input type="text" id="schedule-task" class="input" placeholder="Vazifa nomi">
+                    </div>
+                    
+                    <button onclick="addSchedule()" class="btn">➕ VAZIFA QO'SHISH</button>
+                    
+                    <div id="schedule-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- MORNING TAB -->
+            <div id="morning-tab" class="hidden">
+                <div class="card">
+                    <h2>🌅 ERTALAB MASHQLARI</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 16px;">
+                        <input type="date" id="morning-date" class="input">
+                        <input type="text" id="morning-name" class="input" placeholder="Mashq nomi">
+                        <input type="number" id="morning-target" class="input" placeholder="Maqsad" min="1">
+                    </div>
+                    
+                    <button onclick="addMorning()" class="btn">➕ MASHQ QO'SHISH</button>
+                    
+                    <div id="morning-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- EVENING TAB -->
+            <div id="evening-tab" class="hidden">
+                <div class="card">
+                    <h2>🌙 KECHQURUN MASHQLARI</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 16px;">
+                        <input type="date" id="evening-date" class="input">
+                        <input type="text" id="evening-name" class="input" placeholder="Mashq nomi">
+                        <input type="number" id="evening-weight" class="input" placeholder="Og'irlik (kg)" min="0">
+                    </div>
+                    
+                    <button onclick="addEvening()" class="btn">➕ MASHQ QO'SHISH</button>
+                    
+                    <div id="evening-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- GOALS TAB -->
+            <div id="goals-tab" class="hidden">
+                <div class="card">
+                    <h2>🎯 MAQSADLAR</h2>
+                    
+                    <div class="grid-2" style="margin-bottom: 16px;">
+                        <input type="text" id="goal-name" class="input" placeholder="Maqsad nomi">
+                        <input type="number" id="goal-target" class="input" placeholder="Maqsad raqami" min="1">
+                    </div>
+                    
+                    <button onclick="addGoal()" class="btn">➕ MAQSAD QO'SHISH</button>
+                    
+                    <div id="goals-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- NUTRITION TAB -->
+            <div id="nutrition-tab" class="hidden">
+                <div class="card">
+                    <h2>🍎 OVQATLANISH REJASI</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 16px;">
+                        <input type="text" id="food-name" class="input" placeholder="Ovqat nomi">
+                        <input type="number" id="food-calories" class="input" placeholder="Kaloriya" min="0">
+                        <input type="time" id="food-time" class="input">
+                    </div>
+                    
+                    <button onclick="addFood()" class="btn">➕ OVQAT QO'SHISH</button>
+                    
+                    <div id="nutrition-list" style="margin-top: 20px;"></div>
+                    
+                    <div style="margin-top: 24px; padding: 20px; background: #0a0e27; border-radius: 8px; border-left: 4px solid #00ff88;">
+                        <p style="font-size: 14px; color: #aaa; margin-bottom: 8px;">Bugungi Kaloriya:</p>
+                        <p style="font-size: 32px; color: #00ff88; font-weight: bold;" id="total-calories">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI INSIGHTS TAB -->
+            <div id="insights-tab" class="hidden">
+                <div class="card">
+                    <h2>🤖 AI MASLAHATLAR</h2>
+                    
+                    <div id="insights-list"></div>
+                    
+                    <button onclick="generateInsights()" class="btn" style="margin-top: 20px;">🔄 YANGI MASLAHAT OLISH</button>
+                </div>
+            </div>
+
+            <!-- WEEKLY TAB -->
+            <div id="weekly-tab" class="hidden">
+                <div class="card">
+                    <h2>📊 HAFTALIK NATIJALAR</h2>
+                    
+                    <div class="grid-2" style="margin-bottom: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="weekly-morning">0</div>
+                            <div class="stat-label">Ertalab Mashqlari</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="weekly-evening">0</div>
+                            <div class="stat-label">Kechqurun Mashqlari</div>
+                        </div>
+                    </div>
+                    
+                    <div id="weekly-list"></div>
+                </div>
+            </div>
+
+            <!-- STATS TAB -->
+            <div id="stats-tab" class="hidden">
+                <div class="card">
+                    <h2>📈 STATISTIKA</h2>
+                    
+                    <div class="grid-3" style="margin-bottom: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-workouts">0</div>
+                            <div class="stat-label">Jami Mashqlar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-goals">0</div>
+                            <div class="stat-label">Maqsadlar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="completion-rate">0%</div>
+                            <div class="stat-label">Bajarilish</div>
+                        </div>
+                    </div>
+                    
+                    <div id="stats-list"></div>
+                </div>
+            </div>
+
+            <!-- ADMIN TAB -->
+            <div id="admin-tab" class="hidden">
+                <div class="card">
+                    <h2>⚙️ ADMIN PANEL</h2>
+                    
+                    <div style="padding: 16px; background: #ff0055; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 14px; font-weight: bold;">⚠️ Faqat adminlar uchun!</p>
+                    </div>
+                    
+                    <!-- Price Settings -->
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="color: #00d4ff; margin-bottom: 16px;">Narx Sozlamalari</h3>
+                        <div class="grid-2" style="margin-bottom: 12px;">
+                            <input type="number" id="admin-price" class="input" placeholder="Oylik narx (so'm)" min="0">
+                            <input type="number" id="admin-discount" class="input" placeholder="Chegirma (%)" min="0" max="100">
+                        </div>
+                        <button onclick="savePriceSettings()" class="btn">💾 SAQLASH</button>
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #0f3460; margin: 24px 0;">
+                    
+                    <!-- User Management -->
+                    <div>
+                        <h3 style="color: #00d4ff; margin-bottom: 16px;">Foydalanuvchilar</h3>
+                        <button onclick="loadUsers()" class="btn btn-sec" style="margin-bottom: 16px;">🔄 YANGILASH</button>
+                        <div id="admin-users-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h2 style="color: #00d4ff; margin-bottom: 24px;">✏️ TAHRIRLASH</h2>
+            
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-type">
+            
+            <div id="edit-fields"></div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button onclick="saveEdit()" class="btn" style="flex: 1;">💾 SAQLASH</button>
+                <button onclick="closeEditModal()" class="btn btn-sec" style="flex: 1;">❌ BEKOR QILISH</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATABASE ====================
+        const API_URL = 'http://localhost:5003';
+        let currentUser = null;
+        let userData = null;
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function formatPhone(input) {
+            if (!input) return;
+            let val = input.value.replace(/\D/g, '');
+            if (val.length > 12) val = val.slice(0, 12);
+            
+            let formatted = '';
+            if (val.length > 0) formatted = '+' + val.slice(0, 3);
+            if (val.length > 3) formatted += ' ' + val.slice(3, 5);
+            if (val.length > 5) formatted += ' ' + val.slice(5, 8);
+            if (val.length > 8) formatted += ' ' + val.slice(8, 10);
+            if (val.length > 10) formatted += ' ' + val.slice(10, 12);
+            
+            input.value = formatted;
+        }
+
+        function validatePhone(phoneStr) {
+            // +998 dan keyin kamida bitta raqam bo'lishi kerak
+            const cleaned = phoneStr.replace(/\D/g, '');
+            return cleaned.length >= 4; // +998 + kamida 1 raqam
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: '#00ff88',
+                error: '#ff0055',
+                info: '#00d4ff',
+                warning: '#ffaa00'
+            };
+            
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type]};
+                color: #0a0e27;
+                padding: 16px 24px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 3000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        async function saveToServer() {
+            if (!currentUser || !userData) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/save-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Data saved to MongoDB');
+                } else {
+                    console.error('❌ Failed to save:', result.error);
+                }
+            } catch (err) {
+                console.error('❌ Save error:', err);
+            }
+        }
+
+        async function loadFromServer() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/get-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentUser })
+                });
+                
+                const result = await response.json();
+                if (result.success && result.user) {
+                    userData = result.user;
+                    console.log('✅ Data loaded from MongoDB');
+                    return true;
+                }
+            } catch (err) {
+                console.error('❌ Load error:', err);
+            }
+            return false;
+        }
+
+        // ==================== AUTH FUNCTIONS ====================
+        async function login() {
+            const phone = document.getElementById('phone').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            
+            if (!phone || !pass) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, pass })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentUser = phone;
+                    userData = result.user;
+                    showNotification('Xush kelibsiz!', 'success');
+                    showMainScreen();
+                } else {
+                    showNotification('Telefon yoki parol noto\'g\'ri!', 'error');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                showNotification('Server bilan bog\'lanishda xatolik!', 'error');
+            }
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        function backToLogin() {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+            const pass2 = document.getElementById('reg-pass2').value.trim();
+            
+            if (!name || !phone || !pass || !pass2) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (pass.length < 4 || pass.length > 6) {
+                showNotification('Parol 4-6 raqam bo\'lishi kerak!', 'error');
+                return;
+            }
+            
+            if (pass !== pass2) {
+                showNotification('Parollar mos emas!', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, pass, name })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Akkaunt yaratildi! Endi kirish mumkin.', 'success');
+                    backToLogin();
+                    document.getElementById('phone').value = phone;
+                } else if (result.error === 'exists') {
+                    showNotification('Bu telefon allaqachon ro\'yxatdan o\'tgan!', 'error');
+                } else {
+                    showNotification('Xatolik yuz berdi!', 'error');
+                }
+            } catch (err) {
+                console.error('Register error:', err);
+                showNotification('Server bilan bog\'lanishda xatolik!', 'error');
+            }
+        }
+
+        function logout() {
+            if (confirm('Chiqishni xohlaysizmi?')) {
+                currentUser = null;
+                userData = null;
+                location.reload();
+            }
+        }
+
+        // ==================== UI FUNCTIONS ====================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('show');
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('[id$="-tab"]').forEach(el => el.classList.add('hidden'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Update active button
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content
+            updateUI();
+        }
+
+        function showMainScreen() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            
+            document.getElementById('user-phone').textContent = currentUser;
+            document.getElementById('user-name').textContent = userData.name || 'Foydalanuvchi';
+            
+            updateUI();
+        }
+
+        // ==================== SCHEDULE FUNCTIONS ====================
+        function addSchedule() {
+            const time = document.getElementById('schedule-time').value;
+            const task = document.getElementById('schedule-task').value.trim();
+            
+            if (!time || !task) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (!userData.schedule) userData.schedule = {};
+            const today = new Date().toISOString().split('T')[0];
+            if (!userData.schedule[today]) userData.schedule[today] = [];
+            
+            userData.schedule[today].push({
+                id: Date.now(),
+                time,
+                name: task,
+                completed: false
+            });
+            
+            document.getElementById('schedule-time').value = '';
+            document.getElementById('schedule-task').value = '';
+            
+            saveToServer();
+            updateUI();
+            showNotification('Vazifa qo\'shildi!', 'success');
+        }
+
+        function toggleSchedule(id) {
+            const today = new Date().toISOString().split('T')[0];
+            const task = userData.schedule[today].find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveToServer();
+                updateUI();
+            }
+        }
+
+        function deleteSchedule(id) {
+            if (!confirm('O\'chirish?')) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            userData.schedule[today] = userData.schedule[today].filter(t => t.id !== id);
+            
+            saveToServer();
+            updateUI();
+            showNotification('Vazifa o\'chirildi!', 'success');
+        }
+
+        // ==================== MORNING FUNCTIONS ====================
+        function addMorning() {
+            const date = document.getElementById('morning-date').value;
+            const name = document.getElementById('morning-name').value.trim();
+            const target = parseInt(document.getElementById('morning-target').value) || 0;
+            
+            if (!date || !name || !target) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (!userData.morning) userData.morning = [];
+            
+            userData.morning.push({
+                id: Date.now(),
+                date,
+                name,
+                target,
+                actual: 0,
+                status: 'pending'
+            });
+            
+            document.getElementById('morning-date').value = '';
+            document.getElementById('morning-name').value = '';
+            document.getElementById('morning-target').value = '';
+            
+            saveToServer();
+            updateUI();
+            showNotification('Mashq qo\'shildi!', 'success');
+        }
+
+        function openEditMorning(id) {
+            const item = userData.morning.find(m => m.id === id);
+            if (!item) return;
+            
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-type').value = 'morning';
+            
+            document.getElementById('edit-fields').innerHTML = `
+                <input type="date" id="edit-date" class="input" value="${item.date}">
+                <input type="text" id="edit-name" class="input" value="${item.name}">
+                <input type="number" id="edit-target" class="input" value="${item.target}" placeholder="Maqsad">
+                <input type="number" id="edit-actual" class="input" value="${item.actual}" placeholder="Qilgan">
+            `;
+            
+            document.getElementById('edit-modal').classList.add('show');
+        }
+
+        function deleteMorning(id) {
+            if (!confirm('O\'chirish?')) return;
+            
+            userData.morning = userData.morning.filter(m => m.id !== id);
+            
+            saveToServer();
+            updateUI();
+            showNotification('Mashq o\'chirildi!', 'success');
+        }
+
+        // ==================== EVENING FUNCTIONS ====================
+        function addEvening() {
+            const date = document.getElementById('evening-date').value;
+            const name = document.getElementById('evening-name').value.trim();
+            const weight = parseInt(document.getElementById('evening-weight').value) || 0;
+            
+            if (!date || !name || !weight) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (!userData.evening) userData.evening = [];
+            
+            userData.evening.push({
+                id: Date.now(),
+                date,
+                name,
+                weight,
+                sets: 0,
+                reps: 0,
+                actual: 0,
+                status: 'pending'
+            });
+            
+            document.getElementById('evening-date').value = '';
+            document.getElementById('evening-name').value = '';
+            document.getElementById('evening-weight').value = '';
+            
+            saveToServer();
+            updateUI();
+            showNotification('Mashq qo\'shildi!', 'success');
+        }
+
+        function openEditEvening(id) {
+            const item = userData.evening.find(e => e.id === id);
+            if (!item) return;
+            
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-type').value = 'evening';
+            
+            document.getElementById('edit-fields').innerHTML = `
+                <input type="date" id="edit-date" class="input" value="${item.date}">
+                <input type="text" id="edit-name" class="input" value="${item.name}">
+                <input type="number" id="edit-weight" class="input" value="${item.weight}" placeholder="Og'irlik (kg)">
+                <input type="number" id="edit-actual" class="input" value="${item.actual}" placeholder="Qilgan">
+            `;
+            
+            document.getElementById('edit-modal').classList.add('show');
+        }
+
+        function deleteEvening(id) {
+            if (!confirm('O\'chirish?')) return;
+            
+            userData.evening = userData.evening.filter(e => e.id !== id);
+            
+            saveToServer();
+            updateUI();
+            showNotification('Mashq o\'chirildi!', 'success');
+        }
+
+        // ==================== GOALS FUNCTIONS ====================
+        function addGoal() {
+            const name = document.getElementById('goal-name').value.trim();
+            const target = parseInt(document.getElementById('goal-target').value) || 0;
+            
+            if (!name || !target) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (!userData.goals) userData.goals = [];
+            
+            userData.goals.push({
+                id: Date.now(),
+                name,
+                target,
+                current: 0,
+                days: 30
+            });
+            
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
+            
+            saveToServer();
+            updateUI();
+            showNotification('Maqsad qo\'shildi!', 'success');
+        }
+
+        function openEditGoal(id) {
+            const item = userData.goals.find(g => g.id === id);
+            if (!item) return;
+            
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-type').value = 'goal';
+            
+            document.getElementById('edit-fields').innerHTML = `
+                <input type="text" id="edit-name" class="input" value="${item.name}">
+                <input type="number" id="edit-target" class="input" value="${item.target}" placeholder="Maqsad">
+                <input type="number" id="edit-current" class="input" value="${item.current}" placeholder="Joriy">
+            `;
+            
+            document.getElementById('edit-modal').classList.add('show');
+        }
+
+        function deleteGoal(id) {
+            if (!confirm('O\'chirish?')) return;
+            
+            userData.goals = userData.goals.filter(g => g.id !== id);
+            
+            saveToServer();
+            updateUI();
+            showNotification('Maqsad o\'chirildi!', 'success');
+        }
+
+        // ==================== NUTRITION FUNCTIONS ====================
+        function addFood() {
+            const name = document.getElementById('food-name').value.trim();
+            const calories = parseInt(document.getElementById('food-calories').value) || 0;
+            const time = document.getElementById('food-time').value;
+            
+            if (!name || !calories || !time) {
+                showNotification('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (!userData.foods) userData.foods = [];
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            userData.foods.push({
+                id: Date.now(),
+                date: today,
+                name,
+                calories,
+                time
+            });
+            
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-calories').value = '';
+            document.getElementById('food-time').value = '';
+            
+            saveToServer();
+            updateUI();
+            showNotification('Ovqat qo\'shildi!', 'success');
+        }
+
+        function deleteFood(id) {
+            if (!confirm('O\'chirish?')) return;
+            
+            userData.foods = userData.foods.filter(f => f.id !== id);
+            
+            saveToServer();
+            updateUI();
+            showNotification('Ovqat o\'chirildi!', 'success');
+        }
+
+        // ==================== EDIT MODAL ====================
+        function saveEdit() {
+            const id = parseInt(document.getElementById('edit-id').value);
+            const type = document.getElementById('edit-type').value;
+            
+            if (type === 'morning') {
+                const item = userData.morning.find(m => m.id === id);
+                if (item) {
+                    item.date = document.getElementById('edit-date').value;
+                    item.name = document.getElementById('edit-name').value;
+                    item.target = parseInt(document.getElementById('edit-target').value) || 0;
+                    item.actual = parseInt(document.getElementById('edit-actual').value) || 0;
+                    item.status = item.actual >= item.target ? 'completed' : item.actual > 0 ? 'partial' : 'pending';
+                }
+            } else if (type === 'evening') {
+                const item = userData.evening.find(e => e.id === id);
+                if (item) {
+                    item.date = document.getElementById('edit-date').value;
+                    item.name = document.getElementById('edit-name').value;
+                    item.weight = parseInt(document.getElementById('edit-weight').value) || 0;
+                    item.actual = parseInt(document.getElementById('edit-actual').value) || 0;
+                    item.status = item.actual > 0 ? 'completed' : 'pending';
+                }
+            } else if (type === 'goal') {
+                const item = userData.goals.find(g => g.id === id);
+                if (item) {
+                    item.name = document.getElementById('edit-name').value;
+                    item.target = parseInt(document.getElementById('edit-target').value) || 0;
+                    item.current = parseInt(document.getElementById('edit-current').value) || 0;
+                }
+            }
+            
+            closeEditModal();
+            saveToServer();
+            updateUI();
+            showNotification('Saqlandi!', 'success');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('show');
+        }
+
+        // ==================== AI INSIGHTS ====================
+        function generateInsights() {
+            const insights = [];
+            
+            // Morning stats
+            const morningCompleted = (userData.morning || []).filter(m => m.status === 'completed').length;
+            const morningTotal = (userData.morning || []).length;
+            const morningRate = morningTotal > 0 ? Math.round((morningCompleted / morningTotal) * 100) : 0;
+            
+            insights.push({
+                icon: '🌅',
+                title: 'Ertalab Mashqlari',
+                text: `${morningCompleted}/${morningTotal} bajarildi (${morningRate}%)`,
+                color: morningRate >= 80 ? '#00ff88' : morningRate >= 50 ? '#ffaa00' : '#ff0055'
+            });
+            
+            // Evening stats
+            const eveningCompleted = (userData.evening || []).filter(e => e.status === 'completed').length;
+            const eveningTotal = (userData.evening || []).length;
+            const eveningRate = eveningTotal > 0 ? Math.round((eveningCompleted / eveningTotal) * 100) : 0;
+            
+            insights.push({
+                icon: '🌙',
+                title: 'Kechqurun Mashqlari',
+                text: `${eveningCompleted}/${eveningTotal} bajarildi (${eveningRate}%)`,
+                color: eveningRate >= 80 ? '#00ff88' : eveningRate >= 50 ? '#ffaa00' : '#ff0055'
+            });
+            
+            // Goals progress
+            const goalsCompleted = (userData.goals || []).filter(g => g.current >= g.target).length;
+            const goalsTotal = (userData.goals || []).length;
+            
+            insights.push({
+                icon: '🎯',
+                title: 'Maqsadlar',
+                text: `${goalsCompleted}/${goalsTotal} maqsad bajarildi`,
+                color: '#00d4ff'
+            });
+            
+            // Recommendations
+            if (morningRate < 50) {
+                insights.push({
+                    icon: '💡',
+                    title: 'Tavsiya',
+                    text: 'Ertalab mashqlariga ko\'proq e\'tibor bering!',
+                    color: '#ffaa00'
+                });
+            }
+            
+            if (eveningRate >= 80 && morningRate >= 80) {
+                insights.push({
+                    icon: '🏆',
+                    title: 'Ajoyib!',
+                    text: 'Siz zo\'r natijaga erishdingiz!',
+                    color: '#00ff88'
+                });
+            }
+            
+            return insights;
+        }
+
+        // ==================== ADMIN FUNCTIONS ====================
+        async function savePriceSettings() {
+            const price = parseInt(document.getElementById('admin-price').value) || 0;
+            const discount = parseInt(document.getElementById('admin-discount').value) || 0;
+            
+            try {
+                const priceRes = await fetch(`${API_URL}/api/admin/save-price`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ price })
+                });
+                
+                const discountRes = await fetch(`${API_URL}/api/admin/save-discount`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ discount })
+                });
+                
+                if (priceRes.ok && discountRes.ok) {
+                    showNotification('Narx sozlamalari saqlandi!', 'success');
+                } else {
+                    showNotification('Xatolik yuz berdi!', 'error');
+                }
+            } catch (err) {
+                console.error('Save price error:', err);
+                showNotification('Server bilan bog\'lanishda xatolik!', 'error');
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const usersList = document.getElementById('admin-users-list');
+                    
+                    if (result.users.length === 0) {
+                        usersList.innerHTML = '<div class="item"><span>Foydalanuvchilar yo\'q</span></div>';
+                        return;
+                    }
+                    
+                    usersList.innerHTML = result.users.map(user => `
+                        <div class="item">
+                            <div>
+                                <p style="font-weight: bold; color: #00d4ff;">${user.name || 'Noma\'lum'}</p>
+                                <p style="font-size: 12px; color: #aaa;">${user.phone}</p>
+                                <p style="font-size: 12px; color: ${user.approved ? '#00ff88' : '#ff0055'};">
+                                    ${user.approved ? '✅ Tasdiqlangan' : '⏳ Kutilmoqda'}
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                ${!user.approved ? `
+                                    <button onclick="approveUser('${user.phone}')" style="background: #00ff88; color: #0a0e27; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                        ✓ Tasdiqlash
+                                    </button>
+                                ` : ''}
+                                <button onclick="blockUser('${user.phone}')" style="background: #ffaa00; color: #0a0e27; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                    🔒 Bloklash
+                                </button>
+                                <button onclick="removeUser('${user.phone}')" style="background: #ff0055; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                    🗑️ O'chirish
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Load users error:', err);
+                showNotification('Foydalanuvchilarni yuklashda xatolik!', 'error');
+            }
+        }
+
+        async function approveUser(phone) {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, approved: true })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Foydalanuvchi tasdiqlandi!', 'success');
+                    loadUsers();
+                }
+            } catch (err) {
+                console.error('Approve error:', err);
+                showNotification('Xatolik yuz berdi!', 'error');
+            }
+        }
+
+        async function blockUser(phone) {
+            if (!confirm('Foydalanuvchini bloklash?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/block-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Foydalanuvchi bloklandi!', 'success');
+                    loadUsers();
+                }
+            } catch (err) {
+                console.error('Block error:', err);
+                showNotification('Xatolik yuz berdi!', 'error');
+            }
+        }
+
+        async function removeUser(phone) {
+            if (!confirm('Foydalanuvchini o\'chirish?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/remove`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Foydalanuvchi o\'chirildi!', 'success');
+                    loadUsers();
+                }
+            } catch (err) {
+                console.error('Remove error:', err);
+                showNotification('Xatolik yuz berdi!', 'error');
+            }
+        }
+
+        // ==================== UPDATE UI ====================
+        function updateUI() {
+            if (!userData) return;
+            
+            // Initialize arrays if not exist
+            if (!userData.schedule) userData.schedule = {};
+            if (!userData.morning) userData.morning = [];
+            if (!userData.evening) userData.evening = [];
+            if (!userData.goals) userData.goals = [];
+            if (!userData.foods) userData.foods = [];
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            // ===== SCHEDULE =====
+            const scheduleList = document.getElementById('schedule-list');
+            const schedule = userData.schedule[today] || [];
+            schedule.sort((a, b) => a.time.localeCompare(b.time));
+            
+            if (schedule.length === 0) {
+                scheduleList.innerHTML = '<div class="item"><span>Bugun uchun vazifalar yo\'q</span></div>';
+            } else {
+                scheduleList.innerHTML = schedule.map(task => `
+                    <div class="item ${task.completed ? 'completed' : ''}">
+                        <div>
+                            <span style="font-weight: bold; color: #00d4ff;">${task.time}</span>
+                            <span style="margin-left: 12px; ${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.name}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="toggleSchedule(${task.id})" style="background: ${task.completed ? '#00ff88' : '#ffaa00'}; color: #0a0e27; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                ${task.completed ? '✓' : '○'}
+                            </button>
+                            <button onclick="deleteSchedule(${task.id})" style="background: #ff0055; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // ===== MORNING =====
+            const morningList = document.getElementById('morning-list');
+            if (userData.morning.length === 0) {
+                morningList.innerHTML = '<div class="item"><span>Ertalab mashqlari yo\'q</span></div>';
+            } else {
+                morningList.innerHTML = userData.morning.map(m => `
+                    <div class="item ${m.status}">
+                        <div>
+                            <p style="font-weight: bold; color: #00d4ff;">${m.name}</p>
+                            <p style="font-size: 12px; color: #aaa;">${m.date}</p>
+                            <p style="font-size: 14px; margin-top: 4px;">
+                                <span style="color: #00ff88; font-weight: bold;">${m.actual}</span> / 
+                                <span style="color: #fff;">${m.target}</span>
+                            </p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${Math.min((m.actual / m.target) * 100, 100)}%"></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="openEditMorning(${m.id})" style="background: #00d4ff; color: #0a0e27; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                ✏️
+                            </button>
+                            <button onclick="deleteMorning(${m.id})" style="background: #ff0055; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // ===== EVENING =====
+            const eveningList = document.getElementById('evening-list');
+            if (userData.evening.length === 0) {
+                eveningList.innerHTML = '<div class="item"><span>Kechqurun mashqlari yo\'q</span></div>';
+            } else {
+                eveningList.innerHTML = userData.evening.map(e => `
+                    <div class="item ${e.status}">
+                        <div>
+                            <p style="font-weight: bold; color: #00d4ff;">${e.name}</p>
+                            <p style="font-size: 12px; color: #aaa;">${e.date}</p>
+                            <p style="font-size: 14px; margin-top: 4px;">
+                                <span style="color: #ffaa00; font-weight: bold;">${e.weight} kg</span> - 
+                                <span style="color: #00ff88; font-weight: bold;">${e.actual}</span> marta
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="openEditEvening(${e.id})" style="background: #00d4ff; color: #0a0e27; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                ✏️
+                            </button>
+                            <button onclick="deleteEvening(${e.id})" style="background: #ff0055; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // ===== GOALS =====
+            const goalsList = document.getElementById('goals-list');
+            if (userData.goals.length === 0) {
+                goalsList.innerHTML = '<div class="item"><span>Maqsadlar yo\'q</span></div>';
+            } else {
+                goalsList.innerHTML = userData.goals.map(g => {
+                    const progress = Math.min((g.current / g.target) * 100, 100);
+                    return `
+                        <div class="item">
+                            <div style="flex: 1;">
+                                <p style="font-weight: bold; color: #00d4ff;">${g.name}</p>
+                                <p style="font-size: 14px; margin-top: 4px;">
+                                    <span style="color: #00ff88; font-weight: bold;">${g.current}</span> / 
+                                    <span style="color: #fff;">${g.target}</span>
+                                    <span style="color: #aaa; margin-left: 8px;">(${Math.round(progress)}%)</span>
+                                </p>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="openEditGoal(${g.id})" style="background: #00d4ff; color: #0a0e27; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                    ✏️
+                                </button>
+                                <button onclick="deleteGoal(${g.id})" style="background: #ff0055; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // ===== NUTRITION =====
+            const nutritionList = document.getElementById('nutrition-list');
+            const todayFoods = userData.foods.filter(f => f.date === today);
+            const totalCalories = todayFoods.reduce((sum, f) => sum + f.calories, 0);
+            
+            document.getElementById('total-calories').textContent = totalCalories;
+            
+            if (todayFoods.length === 0) {
+                nutritionList.innerHTML = '<div class="item"><span>Bugun ovqat qo\'shilmagan</span></div>';
+            } else {
+                nutritionList.innerHTML = todayFoods.map(f => `
+                    <div class="item">
+                        <div>
+                            <p style="font-weight: bold; color: #00d4ff;">${f.name}</p>
+                            <p style="font-size: 12px; color: #aaa;">${f.time}</p>
+                            <p style="font-size: 14px; margin-top: 4px; color: #00ff88; font-weight: bold;">
+                                ${f.calories} kcal
+                            </p>
+                        </div>
+                        <button onclick="deleteFood(${f.id})" style="background: #ff0055; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                            🗑️
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            // ===== AI INSIGHTS =====
+            const insightsList = document.getElementById('insights-list');
+            const insights = generateInsights();
+            
+            insightsList.innerHTML = insights.map(insight => `
+                <div class="item" style="border-left-color: ${insight.color};">
+                    <div>
+                        <p style="font-size: 24px; margin-bottom: 8px;">${insight.icon}</p>
+                        <p style="font-weight: bold; color: #00d4ff; margin-bottom: 4px;">${insight.title}</p>
+                        <p style="font-size: 14px; color: #fff;">${insight.text}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // ===== WEEKLY STATS =====
+            let weekMorning = 0, weekEvening = 0;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                weekMorning += userData.morning.filter(m => m.date === dateStr && m.status === 'completed').length;
+                weekEvening += userData.evening.filter(e => e.date === dateStr && e.status === 'completed').length;
+            }
+            
+            document.getElementById('weekly-morning').textContent = weekMorning;
+            document.getElementById('weekly-evening').textContent = weekEvening;
+            
+            const weeklyList = document.getElementById('weekly-list');
+            weeklyList.innerHTML = `
+                <div class="item">
+                    <span>So'nggi 7 kunda jami ${weekMorning + weekEvening} ta mashq bajarildi</span>
+                </div>
+                <div class="item">
+                    <span>Kunlik o'rtacha: ${Math.round((weekMorning + weekEvening) / 7)} ta mashq</span>
+                </div>
+            `;
+            
+            // ===== STATS =====
+            const totalWorkouts = userData.morning.length + userData.evening.length;
+            const completedWorkouts = userData.morning.filter(m => m.status === 'completed').length + 
+                                     userData.evening.filter(e => e.status === 'completed').length;
+            const completionRate = totalWorkouts > 0 ? Math.round((completedWorkouts / totalWorkouts) * 100) : 0;
+            
+            document.getElementById('total-workouts').textContent = totalWorkouts;
+            document.getElementById('total-goals').textContent = userData.goals.length;
+            document.getElementById('completion-rate').textContent = completionRate + '%';
+            
+            const statsList = document.getElementById('stats-list');
+            statsList.innerHTML = `
+                <div class="item">
+                    <span>Jami bajarilgan mashqlar: ${completedWorkouts}</span>
+                </div>
+                <div class="item">
+                    <span>Bajarilmagan mashqlar: ${totalWorkouts - completedWorkouts}</span>
+                </div>
+                <div class="item">
+                    <span>Bugungi kaloriya: ${totalCalories} kcal</span>
+                </div>
+            `;
+        }
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('load', async function() {
+            // Clear service worker and cache
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+            
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let name of cacheNames) {
+                    await caches.delete(name);
+                }
+            }
+            
+            // Setup phone formatting
+            const phoneInputs = ['phone', 'reg-phone'];
+            phoneInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', function() {
+                        formatPhone(this);
+                    });
+                }
+            });
+            
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('morning-date').value = today;
+            document.getElementById('evening-date').value = today;
+            
+            console.log('✅ NURAZIZ - To\'liq Versiya yuklandi');
+            console.log('📱 MongoDB integratsiya faol');
+            console.log('🚀 Server: ' + API_URL);
+        });
+
+        // Auto-save every 30 seconds
+        setInterval(() => {
+            if (currentUser && userData) {
+                saveToServer();
+            }
+        }, 30000);
+
+        // Handle page visibility change (tab switching)
+        document.addEventListener('visibilitychange', async function() {
+            if (!document.hidden && currentUser) {
+                // Reload data when tab becomes visible
+                await loadFromServer();
+                updateUI();
+            }
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

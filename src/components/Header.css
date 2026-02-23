@@ -1,0 +1,122 @@
+.header {
+  background: linear-gradient(135deg, #0f3460 0%, #00d4ff 100%);
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.25);
+  gap: 12px;
+}
+
+.header h1 {
+  font-size: 32px;
+  margin: 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.header-badge {
+  background: #ff00ff;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.burger {
+  background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+  color: #0a0e27;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.burger:hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #ff0055 0%, #cc0044 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 0, 85, 0.4);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 16px;
+    margin-bottom: 16px;
+    flex-wrap: nowrap;
+  }
+
+  .header h1 {
+    font-size: 20px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .burger {
+    padding: 10px 12px;
+    font-size: 18px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .logout-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+  }
+
+  .burger {
+    padding: 8px 10px;
+    font-size: 16px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .logout-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+}
