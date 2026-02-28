@@ -14,8 +14,8 @@ import dbManager from './db-manager.js'
 const __filename = url.fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const PORT = 5003;
-const HOST = 'localhost';
+const PORT = process.env.PORT || 5003;
+const HOST = process.env.HOST || '0.0.0.0';
 
 // MIME types
 const mimeTypes = {
@@ -1778,9 +1778,8 @@ Javobda:
                     // Chat xabarlari bo'lishi kerak
                     if (!u.chatMessages || u.chatMessages.length === 0) return false;
                     
-                    // Kamida bitta o'qilmagan xabar bo'lishi kerak
-                    const hasUnreadMessages = u.chatMessages.some(m => m.role === 'user' && !m.read);
-                    return hasUnreadMessages;
+                    // Barcha foydalanuvchilarni ko'rsatish (o'qilmagan bo'lmasa ham)
+                    return true;
                 })
                 .map(u => ({
                     phone: u.phone,
@@ -1800,6 +1799,49 @@ Javobda:
             });
             res.end(JSON.stringify({ success: false, error: err.message }));
         }
+        return;
+    }
+
+    // API: Admin - Mark messages as read
+    if (pathname === '/api/admin/mark-messages-read' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const { phone } = JSON.parse(body);
+                console.log('✓ Marking messages as read for:', phone);
+                
+                const user = await dbManager.getUser(phone);
+                if (user && user.chatMessages) {
+                    // Mark all user messages as read
+                    user.chatMessages.forEach(msg => {
+                        if (msg.role === 'user') {
+                            msg.read = true;
+                        }
+                    });
+                    await dbManager.saveUser(phone, user);
+                    console.log('✅ Messages marked as read');
+                    res.writeHead(200, { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                    res.end(JSON.stringify({ success: true }));
+                } else {
+                    res.writeHead(404, { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                    res.end(JSON.stringify({ success: false, error: 'User not found' }));
+                }
+            } catch (err) {
+                console.error('❌ Error marking messages as read:', err);
+                res.writeHead(500, { 
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                });
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+        });
         return;
     }
 

@@ -10,11 +10,14 @@ export default function AdminChatTab({ userData }) {
 
   useEffect(() => {
     loadMessages()
+    // Har 5 sekundda yangilanish
+    const interval = setInterval(loadMessages, 5000)
+    return () => clearInterval(interval)
   }, [userData?.phone])
 
   const loadMessages = async () => {
     try {
-      // Load from user.adminMessages
+      // Load from user.chatMessages (not adminMessages)
       const response = await fetch('/api/get-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -22,7 +25,7 @@ export default function AdminChatTab({ userData }) {
       })
       if (response.ok) {
         const result = await response.json()
-        setMessages(result.user?.adminMessages || [])
+        setMessages(result.user?.chatMessages || [])
       }
     } catch (err) {
       console.error('Error loading messages:', err)
