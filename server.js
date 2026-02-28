@@ -2500,7 +2500,52 @@ ESLATMA:
         return;
     }
 
-    // Default to nuraziz-complete-v2.html
+    // Serve static files from dist folder (for production)
+    if (pathname === '/' || pathname === '') {
+        const indexPath = path.join(__dirname, 'dist', 'index.html');
+        if (fs.existsSync(indexPath)) {
+            fs.readFile(indexPath, (err, data) => {
+                if (err) {
+                    res.writeHead(500, { 'Content-Type': 'text/plain' });
+                    res.end('Server Error');
+                } else {
+                    res.writeHead(200, { 
+                        'Content-Type': 'text/html; charset=utf-8',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                    res.end(data);
+                }
+            });
+            return;
+        }
+        // Fallback to old HTML if dist doesn't exist
+        pathname = '/nuraziz-complete-v2.html';
+    }
+
+    // Serve assets from dist folder
+    if (pathname.startsWith('/assets/')) {
+        const assetPath = path.join(__dirname, 'dist', pathname);
+        if (fs.existsSync(assetPath)) {
+            const ext = path.extname(assetPath).toLowerCase();
+            const contentType = mimeTypes[ext] || 'application/octet-stream';
+            fs.readFile(assetPath, (err, data) => {
+                if (err) {
+                    res.writeHead(500, { 'Content-Type': 'text/plain' });
+                    res.end('Server Error');
+                } else {
+                    res.writeHead(200, { 
+                        'Content-Type': contentType,
+                        'Access-Control-Allow-Origin': '*',
+                        'Cache-Control': 'public, max-age=31536000'
+                    });
+                    res.end(data);
+                }
+            });
+            return;
+        }
+    }
+
+    // Default to nuraziz-complete-v2.html (old behavior)
     if (pathname === '/' || pathname === '') {
         pathname = '/nuraziz-complete-v2.html';
     }
